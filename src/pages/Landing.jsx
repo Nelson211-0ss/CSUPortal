@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import {
-  ArrowRight, Award, BookOpen, CalendarDays, HeartPulse, ShieldCheck, Sparkles, Target, Users,
+  ArrowRight, Award, BookOpen, CalendarDays, HeartPulse, ShieldCheck, Target, Users,
 } from "lucide-react";
 import { Logo } from "../components/ui";
 
@@ -57,34 +57,24 @@ export default function Landing() {
           className="absolute inset-0 opacity-[0.05]"
           style={{ backgroundImage: "radial-gradient(circle, white 1px, transparent 1px)", backgroundSize: "22px 22px" }}
         />
-        <div className="relative mx-auto max-w-[1200px] px-4 py-14 sm:px-6 sm:py-28">
-          <div className="mx-auto max-w-3xl text-center">
-            <div className="mb-5 inline-flex items-center gap-2 rounded-md border border-white/20 bg-white/10 px-3 py-1.5 text-xs font-semibold">
-              <Sparkles size={14} className="shrink-0" />
-              <span className="sm:hidden">Advancing Cytology Together</span>
-              <span className="hidden sm:inline">Advancing Cytology. Empowering Professionals. Improving Patient Care.</span>
-            </div>
-            <h1 className="text-3xl font-extrabold tracking-tight sm:text-5xl">
-              A professional home for{" "}
-              <span className="bg-gradient-to-r from-[#60a5fa] via-[#a78bfa] to-[#f472b6] bg-clip-text text-transparent">
-                cytology practice
-              </span>{" "}
-              in Uganda
+        <div className="relative mx-auto max-w-[1200px] px-4 py-16 sm:px-6 sm:py-28">
+          <div className="mx-auto max-w-2xl text-center">
+            <h1 className="text-4xl font-extrabold tracking-tight sm:text-6xl">
+              A professional home for cytology practice in Uganda
             </h1>
-            <p className="mx-auto mt-4 max-w-2xl text-sm leading-6 text-slate-300 sm:text-base">
-              Track continuing professional development, submit and verify CPD evidence, discover training and
-              conferences, and stay connected with the Cytology Society of Uganda.
+            <p className="mx-auto mt-5 max-w-md text-sm leading-6 text-slate-300 sm:text-base">
+              Track CPD, verify evidence, and discover training — all in one place.
             </p>
             <div className="mx-auto mt-8 flex w-full max-w-xs flex-col items-stretch gap-3 sm:w-auto sm:max-w-none sm:flex-row sm:flex-wrap sm:items-center sm:justify-center">
               <Link
                 to="/register"
-                className="inline-flex items-center justify-center gap-2 rounded-md bg-[#7c3aed] px-5 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-[#6d28d9] hover:shadow-md"
+                className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#7c3aed] px-5 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-[#6d28d9] hover:shadow-md"
               >
                 Get started <ArrowRight size={16} />
               </Link>
               <Link
                 to="/login"
-                className="rounded-md border border-white/25 bg-white/10 px-5 py-3 text-center text-sm font-bold transition hover:bg-white/15"
+                className="rounded-xl border border-white/25 bg-white/10 px-5 py-3 text-center text-sm font-bold transition hover:bg-white/15"
               >
                 I already have an account
               </Link>
@@ -93,9 +83,9 @@ export default function Landing() {
         </div>
       </section>
 
-      <section className="mx-auto max-w-[1200px] px-4 py-12 sm:px-6 sm:py-16">
-        <div className="grid gap-5 sm:gap-6 md:grid-cols-2">
-          <div className="rounded-lg border border-slate-200 p-6 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md sm:p-8">
+      <section className="mx-auto max-w-[1200px] px-4 py-10 sm:px-6 sm:py-16">
+        <div className="grid gap-4 sm:gap-6 md:grid-cols-2">
+          <div className="rounded-xl border border-slate-100 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md sm:p-8">
             <div className="mb-4 inline-flex h-11 w-11 items-center justify-center rounded-md bg-[#eaf1fe] text-[#2563eb]">
               <Target size={20} />
             </div>
@@ -105,7 +95,7 @@ export default function Landing() {
               for improved health outcomes in Uganda and beyond.
             </p>
           </div>
-          <div className="rounded-lg border border-slate-200 p-6 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md sm:p-8">
+          <div className="rounded-xl border border-slate-100 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md sm:p-8">
             <div className="mb-4 inline-flex h-11 w-11 items-center justify-center rounded-md bg-[#fdeaf3] text-[#db2777]">
               <HeartPulse size={20} />
             </div>
@@ -119,9 +109,9 @@ export default function Landing() {
         </div>
       </section>
 
-      <section className="bg-[#f8f7fb] py-12 sm:py-16">
+      <section className="bg-[#f8f7fb] py-10 sm:py-16">
         <div className="mx-auto max-w-[1200px] px-4 sm:px-6">
-          <div className="mb-8 max-w-2xl sm:mb-10">
+          <div className="mb-6 max-w-2xl sm:mb-10">
             <div className="mb-3 inline-flex h-10 w-10 items-center justify-center rounded-md bg-[#f3ebfd] text-[#7c3aed]">
               <ShieldCheck size={19} />
             </div>
@@ -130,11 +120,11 @@ export default function Landing() {
               Ten commitments guiding how CSU serves its members and the public.
             </p>
           </div>
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid gap-3 sm:gap-4 sm:grid-cols-2">
             {OBJECTIVES.map((text, i) => (
               <div
                 key={i}
-                className="flex gap-4 rounded-lg border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+                className="flex items-center gap-4 rounded-xl border border-slate-100 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md sm:p-5"
               >
                 <div className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-[#0b0b12] text-xs font-extrabold text-white">
                   {i + 1}
@@ -146,15 +136,15 @@ export default function Landing() {
         </div>
       </section>
 
-      <section className="mx-auto max-w-[1200px] px-4 py-12 sm:px-6 sm:py-16">
-        <div className="grid gap-5 md:grid-cols-3">
+      <section className="mx-auto max-w-[1200px] px-4 pt-10 pb-8 sm:px-6 sm:py-16">
+        <div className="grid gap-4 sm:gap-5 md:grid-cols-3">
           <FeatureCard icon={Award} tint="purple" title="Track your CPD" text="Log points, upload evidence and see verification status in real time." />
           <FeatureCard icon={CalendarDays} tint="blue" title="Discover training" text="Browse workshops, conferences and professional learning opportunities." />
           <FeatureCard icon={Users} tint="pink" title="Stay verified" text="CSU reviews submitted evidence so your professional record stays credible." />
         </div>
       </section>
 
-      <footer className="border-t border-slate-100 py-10">
+      <footer className="border-t border-slate-100 py-8 sm:py-10">
         <div className="mx-auto flex max-w-[1200px] flex-col items-center gap-4 px-4 text-center sm:flex-row sm:justify-between sm:text-left sm:px-6">
           <div className="flex items-center gap-3">
             <Logo />
@@ -180,7 +170,7 @@ function FeatureCard({ icon: Icon, title, text, tint }) {
     pink: "bg-[#fdeaf3] text-[#db2777]",
   };
   return (
-    <div className="rounded-lg border border-slate-200 p-6 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+    <div className="rounded-xl border border-slate-100 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md sm:p-6">
       <div className={`mb-4 inline-flex h-11 w-11 items-center justify-center rounded-md ${tints[tint]}`}>
         <Icon size={20} />
       </div>
