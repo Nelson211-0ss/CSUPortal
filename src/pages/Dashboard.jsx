@@ -39,7 +39,7 @@ export default function Dashboard() {
   return (
     <div className="fade-up space-y-6">
       <section className="relative overflow-hidden rounded-lg text-white shadow-sm" style={{ background: "#2e1065" }}>
-        <div className="relative aspect-[16/9] w-full lg:absolute lg:inset-y-0 lg:right-0 lg:aspect-square lg:h-full lg:w-auto">
+        <div className="absolute inset-0 lg:inset-y-0 lg:right-0 lg:left-auto lg:aspect-square lg:w-auto">
           <img
             src={heroProfessional}
             alt="CSU medical professional"
@@ -47,7 +47,7 @@ export default function Dashboard() {
           />
           <div
             className="absolute inset-0 lg:hidden"
-            style={{ background: "linear-gradient(180deg, rgba(46,16,101,0) 40%, #2e1065 100%)" }}
+            style={{ background: "linear-gradient(180deg, rgba(46,16,101,0.35) 0%, #2e1065 85%)" }}
           />
         </div>
         <div
