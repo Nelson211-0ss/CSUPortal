@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useOutletContext } from "react-router-dom";
-import { ArrowRight, Award, BookOpen, CalendarDays, Clock3, FileCheck2, Sparkles, Upload, UserRound } from "lucide-react";
+import { ArrowRight, Award, BookOpen, CalendarDays, Clock3, FileCheck2, Upload, UserRound } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { api } from "../api";
 import { Card, Stat, QuickAction, ActivityTable } from "../components/ui";
@@ -58,9 +58,6 @@ export default function Dashboard() {
           }}
         />
         <div className="relative max-w-2xl p-6 sm:p-8">
-          <div className="mb-3 inline-flex items-center gap-2 rounded-md border border-white/20 bg-white/10 px-3 py-1.5 text-xs font-semibold">
-            <Sparkles size={14} /> Professional development hub
-          </div>
           <h1 className="text-2xl font-extrabold tracking-tight sm:text-3xl">Welcome back, {firstName}.</h1>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-300">
             Track your CPD, submit evidence, discover professional learning opportunities, and keep your CSU profile
