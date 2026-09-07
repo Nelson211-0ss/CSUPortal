@@ -107,7 +107,7 @@ export default function PortalLayout() {
       />
       <aside className={`fixed inset-y-0 left-0 z-50 w-[270px] transform border-r border-slate-200 bg-white transition-transform duration-300 lg:translate-x-0 ${mobileOpen ? "translate-x-0" : "-translate-x-full"}`}>
         <div className="flex h-full flex-col">
-          <div className="flex items-center gap-3 border-b border-slate-100 px-6 py-5">
+          <div className="flex items-center gap-3 border-b border-slate-100 px-6 py-4">
             <Logo />
             <div>
               <div className="text-[15px] font-extrabold tracking-tight text-[#5b21b6]">CSU</div>
@@ -118,16 +118,16 @@ export default function PortalLayout() {
             </button>
           </div>
 
-          <div className="px-4 pt-6">
-            <div className="mb-3 px-3 text-[10px] font-bold uppercase tracking-[.16em] text-slate-400">Workspace</div>
-            <nav className="space-y-1">
+          <div className="px-4 pt-5">
+            <div className="mb-2 px-3 text-[10px] font-bold uppercase tracking-[.16em] text-slate-400">Workspace</div>
+            <nav className="space-y-0.5">
               {nav.map(([label, path, Icon]) => {
                 const active = location.pathname === path;
                 return (
                   <button
                     key={path}
                     onClick={() => goTo(path)}
-                    className={`flex w-full items-center gap-3 rounded-md px-3 py-3 text-left text-sm font-semibold transition ${active ? "bg-[#f3ebfd] text-[#7c3aed]" : "text-slate-600 hover:bg-slate-50"}`}
+                    className={`flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-left text-sm font-semibold transition ${active ? "bg-[#f3ebfd] text-[#7c3aed]" : "text-slate-600 hover:bg-slate-50"}`}
                   >
                     <Icon size={18} strokeWidth={active ? 2.4 : 2} />
                     {label}
@@ -138,14 +138,14 @@ export default function PortalLayout() {
             </nav>
           </div>
 
-          <div className="mt-auto p-4">
-            <div className="rounded-lg bg-[#f3ebfd] p-4">
-              <div className="mb-2 flex items-center gap-2 text-[#6d28d9]">
+          <div className="mt-auto p-3.5">
+            <div className="rounded-lg bg-[#f3ebfd] p-3.5">
+              <div className="mb-1.5 flex items-center gap-2 text-[#6d28d9]">
                 <ShieldCheck size={17} />
                 <span className="text-xs font-bold">Professional account</span>
               </div>
               <p className="text-xs leading-5 text-slate-500">Keep your CPD evidence current and your professional profile up to date.</p>
-              <button onClick={() => goTo("/profile")} className="mt-3 text-xs font-bold text-[#7c3aed]">
+              <button onClick={() => goTo("/profile")} className="mt-2 text-xs font-bold text-[#7c3aed]">
                 View profile →
               </button>
             </div>
