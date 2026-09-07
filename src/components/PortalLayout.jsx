@@ -201,14 +201,14 @@ export default function PortalLayout() {
         </main>
       </div>
 
-      <nav className="fixed inset-x-0 bottom-0 z-40 flex items-center justify-around border-t border-slate-200 bg-white/95 backdrop-blur px-2 py-2 lg:hidden">
+      <nav className="fixed inset-x-0 bottom-0 z-40 flex items-center justify-around bg-[#7c3aed] px-2 py-2 shadow-[0_-2px_12px_rgba(0,0,0,.15)] lg:hidden">
         {MOBILE_NAV.map(([label, path, Icon]) => {
           const active = location.pathname === path;
           return (
             <button
               key={path}
               onClick={() => goTo(path)}
-              className={`flex flex-1 flex-col items-center gap-1 rounded-md py-1.5 text-[10px] font-semibold ${active ? "text-[#7c3aed]" : "text-slate-500"}`}
+              className={`flex flex-1 flex-col items-center gap-1 rounded-md py-1.5 text-[10px] font-semibold ${active ? "text-white" : "text-violet-200"}`}
             >
               <Icon size={20} strokeWidth={active ? 2.4 : 2} />
               {label}
