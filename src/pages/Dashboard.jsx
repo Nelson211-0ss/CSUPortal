@@ -60,20 +60,20 @@ export default function Dashboard() {
               "linear-gradient(90deg, rgba(46,16,101,1) 0%, rgba(46,16,101,1) 70%, rgba(46,16,101,0.9) 76%, rgba(46,16,101,0.6) 83%, rgba(46,16,101,0.3) 90%, rgba(46,16,101,0) 98%)",
           }}
         />
-        <div className="relative max-w-2xl p-6 pr-[44%] sm:p-8 sm:pr-[36%] lg:pr-8">
-          <h1 className="text-2xl font-extrabold tracking-tight sm:text-3xl">Welcome back, {firstName}.</h1>
-          <p className="mt-1 text-sm leading-6 text-slate-300">
+        <div className="relative max-w-2xl p-4 pr-[44%] sm:p-8 sm:pr-[36%] lg:pr-8">
+          <h1 className="text-xl font-extrabold leading-tight tracking-tight sm:text-3xl">Welcome back, {firstName}.</h1>
+          <p className="mt-1 text-xs leading-5 text-slate-300 sm:text-sm sm:leading-6">
             Track your CPD, submit evidence, discover professional learning opportunities, and keep your CSU profile
             current.
           </p>
-          <div className="mt-4 flex flex-wrap gap-3">
+          <div className="mt-3 flex flex-wrap gap-2 sm:mt-4 sm:gap-3">
             <button
               onClick={() => navigate("/upload")}
-              className="inline-flex items-center gap-2 rounded-md bg-white px-4 py-2.5 text-sm font-bold text-[#111827] shadow-sm hover:bg-slate-100"
+              className="inline-flex items-center gap-2 rounded-md bg-white px-3.5 py-2 text-xs font-bold text-[#111827] shadow-sm hover:bg-slate-100 sm:px-4 sm:py-2.5 sm:text-sm"
             >
-              Upload CPD <ArrowRight size={16} />
+              Upload CPD <ArrowRight size={14} />
             </button>
-            <button onClick={() => navigate("/cpd")} className="rounded-md border border-white/25 bg-white/10 px-4 py-2.5 text-sm font-bold hover:bg-white/15">
+            <button onClick={() => navigate("/cpd")} className="rounded-md border border-white/25 bg-white/10 px-3.5 py-2 text-xs font-bold hover:bg-white/15 sm:px-4 sm:py-2.5 sm:text-sm">
               View my record
             </button>
           </div>
