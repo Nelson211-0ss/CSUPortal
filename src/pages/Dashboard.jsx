@@ -87,30 +87,30 @@ export default function Dashboard() {
         <Stat title="Profile completion" value={`${stats.profileCompletion}%`} sub={stats.profileCompletion === 100 ? "All set" : "Complete your profile"} icon={UserRound} tint="black" />
       </section>
 
-      <div className="grid gap-6 xl:grid-cols-[1.5fr_.8fr]">
+      <div className="grid gap-4 xl:grid-cols-[1.5fr_.8fr]">
         <Card title="CPD progress" action={<button onClick={() => navigate("/cpd")} className="text-xs font-bold text-[#7c3aed]">View details</button>}>
-          <div className="grid gap-6 md:grid-cols-[1fr_180px] md:items-center">
+          <div className="grid gap-4 md:grid-cols-[1fr_150px] md:items-center">
             <div>
-              <div className="mb-2 flex items-end justify-between">
+              <div className="mb-1.5 flex items-end justify-between">
                 <span className="text-sm font-semibold text-slate-600">Annual target</span>
                 <span className="text-sm font-extrabold text-[#7c3aed]">
                   {stats.totalPoints} / {ANNUAL_TARGET}
                 </span>
               </div>
-              <div className="h-3 overflow-hidden rounded-md bg-slate-100">
+              <div className="h-2.5 overflow-hidden rounded-md bg-slate-100">
                 <div className="h-full rounded-md bg-[#7c3aed]" style={{ width: `${stats.progressPct}%` }} />
               </div>
-              <div className="mt-3 flex items-center justify-between text-xs text-slate-400">
+              <div className="mt-2 flex items-center justify-between text-xs text-slate-400">
                 <span>{Math.max(0, ANNUAL_TARGET - stats.totalPoints)} points remaining</span>
                 <span>{stats.progressPct}% complete</span>
               </div>
-              <div className="mt-5 rounded-md bg-[#f3ebfd] p-3 text-xs leading-5 text-slate-600">
+              <div className="mt-3 rounded-md bg-[#f3ebfd] p-2.5 text-xs leading-5 text-slate-600">
                 <b className="text-[#5b21b6]">Tip:</b> Add your next workshop or conference activity as soon as you receive the evidence certificate.
               </div>
             </div>
-            <div className="mx-auto grid h-36 w-36 place-items-center rounded-md border-2 border-[#7c3aed] bg-[#f8f7fb]">
+            <div className="mx-auto grid h-28 w-28 place-items-center rounded-md border-2 border-[#7c3aed] bg-[#f8f7fb]">
               <div className="text-center">
-                <div className="text-2xl font-extrabold text-[#7c3aed]">{stats.progressPct}%</div>
+                <div className="text-xl font-extrabold text-[#7c3aed]">{stats.progressPct}%</div>
                 <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">complete</div>
               </div>
             </div>
@@ -128,7 +128,7 @@ export default function Dashboard() {
 
       <Card title="Recent CPD activity" action={<button onClick={() => navigate("/cpd")} className="text-xs font-bold text-[#7c3aed]">See all</button>}>
         {loading ? (
-          <div className="py-8 text-center text-sm text-slate-400">Loading...</div>
+          <div className="py-6 text-center text-sm text-slate-400">Loading...</div>
         ) : (
           <ActivityTable activities={submissions.slice(0, 3)} />
         )}
