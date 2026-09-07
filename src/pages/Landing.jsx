@@ -21,19 +21,27 @@ export default function Landing() {
   return (
     <div className="min-h-screen bg-white text-slate-900">
       <header className="sticky top-0 z-30 border-b border-slate-100 bg-white/90 backdrop-blur">
-        <div className="mx-auto flex max-w-[1200px] items-center gap-3 px-4 py-4 sm:px-6">
+        <div className="mx-auto flex max-w-[1200px] items-center gap-2 px-4 py-3 sm:gap-3 sm:px-6 sm:py-4">
           <Logo />
-          <div>
-            <div className="text-sm font-extrabold tracking-tight text-[#5b21b6]">Cytology Society of Uganda</div>
-            <div className="text-[10px] font-semibold uppercase tracking-[.14em] text-slate-400">Professional Portal</div>
+          <div className="min-w-0 leading-tight">
+            <div className="truncate text-xs font-extrabold tracking-tight text-[#5b21b6] sm:text-sm">
+              <span className="sm:hidden">CSU Portal</span>
+              <span className="hidden sm:inline">Cytology Society of Uganda</span>
+            </div>
+            <div className="hidden text-[10px] font-semibold uppercase tracking-[.14em] text-slate-400 sm:block">
+              Professional Portal
+            </div>
           </div>
-          <div className="ml-auto flex items-center gap-2">
-            <Link to="/login" className="rounded-md px-4 py-2.5 text-sm font-bold text-slate-700 hover:bg-slate-50">
+          <div className="ml-auto flex shrink-0 items-center gap-1.5 sm:gap-2">
+            <Link
+              to="/login"
+              className="whitespace-nowrap rounded-md px-2.5 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 sm:px-4 sm:py-2.5 sm:text-sm"
+            >
               Log in
             </Link>
             <Link
               to="/register"
-              className="rounded-md bg-[#7c3aed] px-4 py-2.5 text-sm font-bold text-white shadow-sm hover:bg-[#6d28d9]"
+              className="whitespace-nowrap rounded-md bg-[#7c3aed] px-2.5 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-[#6d28d9] sm:px-4 sm:py-2.5 sm:text-sm"
             >
               Create account
             </Link>
@@ -45,26 +53,39 @@ export default function Landing() {
         <div className="absolute -right-24 -top-32 h-96 w-96 rounded-full bg-[#2563eb]/30 blur-3xl" />
         <div className="absolute -bottom-40 left-1/3 h-96 w-96 rounded-full bg-[#7c3aed]/30 blur-3xl" />
         <div className="absolute -bottom-24 right-10 h-72 w-72 rounded-full bg-[#db2777]/25 blur-3xl" />
-        <div className="relative mx-auto max-w-[1200px] px-4 py-20 sm:px-6 sm:py-28">
+        <div
+          className="absolute inset-0 opacity-[0.05]"
+          style={{ backgroundImage: "radial-gradient(circle, white 1px, transparent 1px)", backgroundSize: "22px 22px" }}
+        />
+        <div className="relative mx-auto max-w-[1200px] px-4 py-14 sm:px-6 sm:py-28">
           <div className="mx-auto max-w-3xl text-center">
             <div className="mb-5 inline-flex items-center gap-2 rounded-md border border-white/20 bg-white/10 px-3 py-1.5 text-xs font-semibold">
-              <Sparkles size={14} /> Advancing Cytology. Empowering Professionals. Improving Patient Care.
+              <Sparkles size={14} className="shrink-0" />
+              <span className="sm:hidden">Advancing Cytology Together</span>
+              <span className="hidden sm:inline">Advancing Cytology. Empowering Professionals. Improving Patient Care.</span>
             </div>
             <h1 className="text-3xl font-extrabold tracking-tight sm:text-5xl">
-              A professional home for cytology practice in Uganda
+              A professional home for{" "}
+              <span className="bg-gradient-to-r from-[#60a5fa] via-[#a78bfa] to-[#f472b6] bg-clip-text text-transparent">
+                cytology practice
+              </span>{" "}
+              in Uganda
             </h1>
             <p className="mx-auto mt-4 max-w-2xl text-sm leading-6 text-slate-300 sm:text-base">
               Track continuing professional development, submit and verify CPD evidence, discover training and
               conferences, and stay connected with the Cytology Society of Uganda.
             </p>
-            <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+            <div className="mx-auto mt-8 flex w-full max-w-xs flex-col items-stretch gap-3 sm:w-auto sm:max-w-none sm:flex-row sm:flex-wrap sm:items-center sm:justify-center">
               <Link
                 to="/register"
-                className="inline-flex items-center gap-2 rounded-md bg-[#7c3aed] px-5 py-3 text-sm font-bold text-white shadow-sm hover:bg-[#6d28d9]"
+                className="inline-flex items-center justify-center gap-2 rounded-md bg-[#7c3aed] px-5 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-[#6d28d9] hover:shadow-md"
               >
                 Get started <ArrowRight size={16} />
               </Link>
-              <Link to="/login" className="rounded-md border border-white/25 bg-white/10 px-5 py-3 text-sm font-bold hover:bg-white/15">
+              <Link
+                to="/login"
+                className="rounded-md border border-white/25 bg-white/10 px-5 py-3 text-center text-sm font-bold transition hover:bg-white/15"
+              >
                 I already have an account
               </Link>
             </div>
@@ -72,9 +93,9 @@ export default function Landing() {
         </div>
       </section>
 
-      <section className="mx-auto max-w-[1200px] px-4 py-16 sm:px-6">
-        <div className="grid gap-6 md:grid-cols-2">
-          <div className="rounded-lg border border-slate-200 p-8">
+      <section className="mx-auto max-w-[1200px] px-4 py-12 sm:px-6 sm:py-16">
+        <div className="grid gap-5 sm:gap-6 md:grid-cols-2">
+          <div className="rounded-lg border border-slate-200 p-6 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md sm:p-8">
             <div className="mb-4 inline-flex h-11 w-11 items-center justify-center rounded-md bg-[#eaf1fe] text-[#2563eb]">
               <Target size={20} />
             </div>
@@ -84,7 +105,7 @@ export default function Landing() {
               for improved health outcomes in Uganda and beyond.
             </p>
           </div>
-          <div className="rounded-lg border border-slate-200 p-8">
+          <div className="rounded-lg border border-slate-200 p-6 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md sm:p-8">
             <div className="mb-4 inline-flex h-11 w-11 items-center justify-center rounded-md bg-[#fdeaf3] text-[#db2777]">
               <HeartPulse size={20} />
             </div>
@@ -98,9 +119,9 @@ export default function Landing() {
         </div>
       </section>
 
-      <section className="bg-[#f8f7fb] py-16">
+      <section className="bg-[#f8f7fb] py-12 sm:py-16">
         <div className="mx-auto max-w-[1200px] px-4 sm:px-6">
-          <div className="mb-10 max-w-2xl">
+          <div className="mb-8 max-w-2xl sm:mb-10">
             <div className="mb-3 inline-flex h-10 w-10 items-center justify-center rounded-md bg-[#f3ebfd] text-[#7c3aed]">
               <ShieldCheck size={19} />
             </div>
@@ -109,9 +130,12 @@ export default function Landing() {
               Ten commitments guiding how CSU serves its members and the public.
             </p>
           </div>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-2">
+          <div className="grid gap-4 sm:grid-cols-2">
             {OBJECTIVES.map((text, i) => (
-              <div key={i} className="flex gap-4 rounded-lg border border-slate-200 bg-white p-5">
+              <div
+                key={i}
+                className="flex gap-4 rounded-lg border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+              >
                 <div className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-[#0b0b12] text-xs font-extrabold text-white">
                   {i + 1}
                 </div>
@@ -122,7 +146,7 @@ export default function Landing() {
         </div>
       </section>
 
-      <section className="mx-auto max-w-[1200px] px-4 py-16 sm:px-6">
+      <section className="mx-auto max-w-[1200px] px-4 py-12 sm:px-6 sm:py-16">
         <div className="grid gap-5 md:grid-cols-3">
           <FeatureCard icon={Award} tint="purple" title="Track your CPD" text="Log points, upload evidence and see verification status in real time." />
           <FeatureCard icon={CalendarDays} tint="blue" title="Discover training" text="Browse workshops, conferences and professional learning opportunities." />
@@ -130,9 +154,19 @@ export default function Landing() {
         </div>
       </section>
 
-      <footer className="border-t border-slate-100 py-8">
-        <div className="mx-auto max-w-[1200px] px-4 text-center text-xs text-slate-400 sm:px-6">
-          © {new Date().getFullYear()} Cytology Society of Uganda. All rights reserved.
+      <footer className="border-t border-slate-100 py-10">
+        <div className="mx-auto flex max-w-[1200px] flex-col items-center gap-4 px-4 text-center sm:flex-row sm:justify-between sm:text-left sm:px-6">
+          <div className="flex items-center gap-3">
+            <Logo />
+            <div className="text-xs leading-tight text-slate-400">
+              <div className="font-bold text-slate-600">Cytology Society of Uganda</div>
+              © {new Date().getFullYear()} All rights reserved.
+            </div>
+          </div>
+          <div className="flex items-center gap-5 text-xs font-semibold text-slate-500">
+            <Link to="/login" className="hover:text-slate-900">Log in</Link>
+            <Link to="/register" className="hover:text-slate-900">Create account</Link>
+          </div>
         </div>
       </footer>
     </div>
@@ -146,7 +180,7 @@ function FeatureCard({ icon: Icon, title, text, tint }) {
     pink: "bg-[#fdeaf3] text-[#db2777]",
   };
   return (
-    <div className="rounded-lg border border-slate-200 p-6">
+    <div className="rounded-lg border border-slate-200 p-6 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
       <div className={`mb-4 inline-flex h-11 w-11 items-center justify-center rounded-md ${tints[tint]}`}>
         <Icon size={20} />
       </div>
