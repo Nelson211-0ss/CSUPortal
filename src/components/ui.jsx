@@ -8,8 +8,8 @@ export function PreviewModal({ title, previewUrl, downloadUrl, filename, onClose
   const canPreview = PREVIEWABLE_EXT.has(ext);
 
   return (
-    <div className="fixed inset-0 z-[110] grid place-items-center bg-slate-950/60 p-4" onClick={onClose}>
-      <div className="flex max-h-[85vh] w-full max-w-3xl flex-col rounded-lg bg-white shadow-2xl" onClick={(e) => e.stopPropagation()}>
+    <div className="modal-backdrop-in fixed inset-0 z-[110] grid place-items-center bg-slate-950/60 p-4" onClick={onClose}>
+      <div className="modal-panel-in flex max-h-[85vh] w-full max-w-3xl flex-col rounded-lg bg-white shadow-2xl" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center justify-between gap-3 border-b border-slate-100 p-4">
           <h3 className="min-w-0 truncate text-sm font-extrabold text-slate-900">{title}</h3>
           <div className="flex shrink-0 items-center gap-1">
@@ -90,7 +90,7 @@ export function MiniMetric({ label, value, suffix }) {
 
 export function QuickAction({ icon: Icon, title, text, onClick }) {
   return (
-    <button onClick={onClick} className="flex items-center gap-3 rounded-md p-3 text-left hover:bg-slate-50">
+    <button onClick={onClick} className="flex items-center gap-3 rounded-md p-3 text-left transition-colors hover:bg-slate-50">
       <div className="grid h-10 w-10 shrink-0 place-items-center rounded-md bg-[#f3ebfd] text-[#7c3aed]">
         <Icon size={18} />
       </div>
@@ -144,7 +144,7 @@ export function Notice({ text }) {
 
 export function Toast({ message }) {
   return (
-    <div className="fixed bottom-20 right-5 z-[100] flex max-w-sm items-center gap-3 rounded-md bg-slate-900 px-4 py-3 text-sm font-semibold text-white shadow-2xl lg:bottom-5">
+    <div className="toast-in fixed bottom-20 right-5 z-[100] flex max-w-sm items-center gap-3 rounded-md bg-slate-900 px-4 py-3 text-sm font-semibold text-white shadow-2xl lg:bottom-5">
       <CheckCircle2 size={18} className="text-[#60a5fa]" />
       {message}
     </div>
@@ -227,7 +227,7 @@ export function ActivityTable({ activities, actions }) {
             </tr>
           )}
           {activities.map((a) => (
-            <tr key={a.id} className="border-b border-slate-50 last:border-0 hover:bg-slate-50/70">
+            <tr key={a.id} className="border-b border-slate-50 transition-colors last:border-0 hover:bg-slate-50/70">
               <td className="px-3 py-4">
                 <div className="font-semibold text-sm text-slate-900">{a.activityTitle}</div>
               </td>

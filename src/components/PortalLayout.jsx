@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import {
   Award, BarChart3, Bell, CalendarDays, ChevronDown, LayoutDashboard, LogOut, Menu,
@@ -45,6 +45,28 @@ export default function PortalLayout() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const notificationsRef = useRef(null);
+  const profileMenuRef = useRef(null);
+
+  useEffect(() => {
+    if (!showNotifications && !showProfileMenu) return;
+    const onPointerDown = (e) => {
+      if (showNotifications && !notificationsRef.current?.contains(e.target)) setShowNotifications(false);
+      if (showProfileMenu && !profileMenuRef.current?.contains(e.target)) setShowProfileMenu(false);
+    };
+    const onKeyDown = (e) => {
+      if (e.key === "Escape") {
+        setShowNotifications(false);
+        setShowProfileMenu(false);
+      }
+    };
+    document.addEventListener("mousedown", onPointerDown);
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("mousedown", onPointerDown);
+      document.removeEventListener("keydown", onKeyDown);
+    };
+  }, [showNotifications, showProfileMenu]);
 
   const nav =
     user?.role === "admin"
@@ -77,7 +99,12 @@ export default function PortalLayout() {
 
   return (
     <div className="min-h-screen bg-[#f8f7fb] text-slate-900">
-      {mobileOpen && <div onClick={() => setMobileOpen(false)} className="fixed inset-0 z-40 bg-slate-950/35 lg:hidden" />}
+      <div
+        onClick={() => setMobileOpen(false)}
+        className={`fixed inset-0 z-40 bg-slate-950/35 transition-opacity duration-300 lg:hidden ${
+          mobileOpen ? "opacity-100" : "pointer-events-none opacity-0"
+        }`}
+      />
       <aside className={`fixed inset-y-0 left-0 z-50 w-[270px] transform border-r border-slate-200 bg-white transition-transform duration-300 lg:translate-x-0 ${mobileOpen ? "translate-x-0" : "-translate-x-full"}`}>
         <div className="flex h-full flex-col">
           <div className="flex items-center gap-3 border-b border-slate-100 px-6 py-5">
@@ -141,57 +168,70 @@ export default function PortalLayout() {
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
                 <input className="w-56 rounded-md border border-slate-200 bg-slate-50 py-2.5 pl-9 pr-3 text-sm outline-none focus:border-[#a78bfa] focus:ring-4 focus:ring-[#f3ebfd]" placeholder="Search portal..." />
               </div>
-              <div className="relative">
-                <button onClick={() => setShowNotifications(!showNotifications)} className="relative rounded-md border border-slate-200 p-2.5 text-slate-600 hover:bg-slate-50">
+              <div className="relative" ref={notificationsRef}>
+                <button
+                  onClick={() => {
+                    setShowNotifications((v) => !v);
+                    setShowProfileMenu(false);
+                  }}
+                  className="relative rounded-md border border-slate-200 p-2.5 text-slate-600 transition-colors hover:bg-slate-50"
+                >
                   <Bell size={18} />
                   <span className="absolute right-2 top-2 h-1.5 w-1.5 rounded-full bg-[#db2777]" />
                 </button>
-                {showNotifications && (
-                  <div className="absolute right-0 top-12 w-80 rounded-lg border border-slate-200 bg-white p-3 shadow-xl">
-                    <div className="flex items-center justify-between px-2 py-2">
-                      <b className="text-sm">Notifications</b>
-                      <span className="text-xs text-[#7c3aed]">Updates</span>
-                    </div>
-                    <Notice text="Check your CPD record for verification updates." />
-                    <Notice text="New cytology events may be available." />
+                <div
+                  className={`absolute right-0 top-12 w-[min(20rem,calc(100vw-2rem))] origin-top-right rounded-lg border border-slate-200 bg-white p-3 shadow-xl transition duration-150 ease-out ${
+                    showNotifications ? "scale-100 opacity-100" : "pointer-events-none scale-95 opacity-0"
+                  }`}
+                >
+                  <div className="flex items-center justify-between px-2 py-2">
+                    <b className="text-sm">Notifications</b>
+                    <span className="text-xs text-[#7c3aed]">Updates</span>
                   </div>
-                )}
+                  <Notice text="Check your CPD record for verification updates." />
+                  <Notice text="New cytology events may be available." />
+                </div>
               </div>
-              <div className="relative">
+              <div className="relative" ref={profileMenuRef}>
                 <button
-                  onClick={() => setShowProfileMenu(!showProfileMenu)}
-                  className="flex items-center gap-2 rounded-md border border-slate-200 bg-white p-1.5 pr-3 hover:bg-slate-50"
+                  onClick={() => {
+                    setShowProfileMenu((v) => !v);
+                    setShowNotifications(false);
+                  }}
+                  className="flex items-center gap-2 rounded-md border border-slate-200 bg-white p-1.5 pr-3 transition-colors hover:bg-slate-50"
                 >
                   <div className="grid h-8 w-8 place-items-center rounded-lg bg-[#f3ebfd] text-xs font-bold text-[#7c3aed]">{initials}</div>
                   <span className="hidden text-sm font-semibold sm:block">{user?.name}</span>
-                  <ChevronDown size={15} className="hidden text-slate-400 sm:block" />
+                  <ChevronDown size={15} className={`hidden text-slate-400 transition-transform sm:block ${showProfileMenu ? "rotate-180" : ""}`} />
                 </button>
-                {showProfileMenu && (
-                  <div className="absolute right-0 top-12 w-56 rounded-lg border border-slate-200 bg-white p-2 shadow-xl">
-                    <div className="border-b border-slate-100 px-3 py-2.5">
-                      <div className="truncate text-sm font-bold text-slate-900">{user?.name}</div>
-                      <div className="truncate text-xs text-slate-400">{user?.email}</div>
-                    </div>
-                    <button
-                      onClick={() => {
-                        setShowProfileMenu(false);
-                        goTo("/profile");
-                      }}
-                      className="flex w-full items-center gap-2 rounded-md px-3 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-50"
-                    >
-                      <UserRound size={16} /> View profile
-                    </button>
-                    <button
-                      onClick={async () => {
-                        await logout();
-                        navigate("/login");
-                      }}
-                      className="flex w-full items-center gap-2 rounded-md px-3 py-2.5 text-sm font-semibold text-rose-500 hover:bg-rose-50"
-                    >
-                      <LogOut size={16} /> Log out
-                    </button>
+                <div
+                  className={`absolute right-0 top-12 w-56 origin-top-right rounded-lg border border-slate-200 bg-white p-2 shadow-xl transition duration-150 ease-out ${
+                    showProfileMenu ? "scale-100 opacity-100" : "pointer-events-none scale-95 opacity-0"
+                  }`}
+                >
+                  <div className="border-b border-slate-100 px-3 py-2.5">
+                    <div className="truncate text-sm font-bold text-slate-900">{user?.name}</div>
+                    <div className="truncate text-xs text-slate-400">{user?.email}</div>
                   </div>
-                )}
+                  <button
+                    onClick={() => {
+                      setShowProfileMenu(false);
+                      goTo("/profile");
+                    }}
+                    className="flex w-full items-center gap-2 rounded-md px-3 py-2.5 text-sm font-semibold text-slate-600 transition-colors hover:bg-slate-50"
+                  >
+                    <UserRound size={16} /> View profile
+                  </button>
+                  <button
+                    onClick={async () => {
+                      await logout();
+                      navigate("/login");
+                    }}
+                    className="flex w-full items-center gap-2 rounded-md px-3 py-2.5 text-sm font-semibold text-rose-500 transition-colors hover:bg-rose-50"
+                  >
+                    <LogOut size={16} /> Log out
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -208,9 +248,9 @@ export default function PortalLayout() {
             <button
               key={path}
               onClick={() => goTo(path)}
-              className={`flex flex-1 flex-col items-center gap-1 rounded-md py-1.5 text-[10px] font-semibold ${active ? "text-white" : "text-violet-200"}`}
+              className={`flex flex-1 flex-col items-center gap-1 rounded-md py-1.5 text-[10px] font-semibold transition-all duration-150 active:scale-90 ${active ? "text-white" : "text-violet-200"}`}
             >
-              <Icon size={20} strokeWidth={active ? 2.4 : 2} />
+              <Icon size={20} strokeWidth={active ? 2.4 : 2} className="transition-transform" />
               {label}
             </button>
           );
