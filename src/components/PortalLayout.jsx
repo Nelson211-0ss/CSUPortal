@@ -127,9 +127,9 @@ export default function PortalLayout() {
                   <button
                     key={path}
                     onClick={() => goTo(path)}
-                    className={`flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-left text-sm font-semibold transition ${active ? "bg-[#f3ebfd] text-[#7c3aed]" : "text-slate-600 hover:bg-slate-50"}`}
+                    className={`flex w-full items-center gap-3 rounded-md px-3 py-2 text-left text-[13px] font-semibold transition ${active ? "bg-[#f3ebfd] text-[#7c3aed]" : "text-slate-600 hover:bg-slate-50"}`}
                   >
-                    <Icon size={18} strokeWidth={active ? 2.4 : 2} />
+                    <Icon size={17} strokeWidth={active ? 2.4 : 2} />
                     {label}
                     {path === "/upload" && <span className="ml-auto rounded-md bg-[#db2777] px-2 py-0.5 text-[10px] font-bold text-white">New</span>}
                   </button>
