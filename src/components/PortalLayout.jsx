@@ -201,7 +201,7 @@ export default function PortalLayout() {
         </main>
       </div>
 
-      <nav className="fixed inset-x-0 bottom-0 z-40 flex items-center justify-around bg-[#7c3aed] px-2 py-2 shadow-[0_-2px_12px_rgba(0,0,0,.15)] lg:hidden">
+      <nav className="fixed inset-x-0 bottom-0 z-40 flex items-center justify-around bg-[#5b21b6] px-2 py-2 shadow-[0_-2px_12px_rgba(0,0,0,.15)] lg:hidden">
         {MOBILE_NAV.map(([label, path, Icon]) => {
           const active = location.pathname === path;
           return (
