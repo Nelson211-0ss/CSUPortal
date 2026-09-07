@@ -59,11 +59,11 @@ export default function Dashboard() {
         />
         <div className="relative max-w-2xl p-6 sm:p-8">
           <h1 className="text-2xl font-extrabold tracking-tight sm:text-3xl">Welcome back, {firstName}.</h1>
-          <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-300">
+          <p className="mt-1 max-w-2xl text-sm leading-6 text-slate-300">
             Track your CPD, submit evidence, discover professional learning opportunities, and keep your CSU profile
             current.
           </p>
-          <div className="mt-6 flex flex-wrap gap-3">
+          <div className="mt-4 flex flex-wrap gap-3">
             <button
               onClick={() => navigate("/upload")}
               className="inline-flex items-center gap-2 rounded-md bg-white px-4 py-2.5 text-sm font-bold text-[#111827] shadow-sm hover:bg-slate-100"
