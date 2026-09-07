@@ -3,7 +3,8 @@ import multer from "multer";
 import path from "node:path";
 import fs from "node:fs";
 import crypto from "node:crypto";
-import { store, UPLOADS_DIR } from "../lib/store.js";
+import * as materials from "../db/materials.js";
+import { UPLOADS_DIR } from "../lib/uploads.js";
 import { requireAuth, requireAdmin } from "../lib/auth.js";
 import { sendInline } from "../lib/files.js";
 
@@ -26,15 +27,13 @@ const upload = multer({
 });
 
 // Any authenticated portal user (professional or admin) can browse and download materials.
-router.get("/materials", requireAuth, (req, res) => {
-  const db = store.read();
-  const materials = [...db.materials].sort((a, b) => new Date(b.uploadedAt) - new Date(a.uploadedAt));
-  res.json({ materials });
+router.get("/materials", requireAuth, async (req, res) => {
+  const list = await materials.list();
+  res.json({ materials: list });
 });
 
-router.get("/materials/:id/file", requireAuth, (req, res) => {
-  const db = store.read();
-  const material = db.materials.find((m) => m.id === req.params.id);
+router.get("/materials/:id/file", requireAuth, async (req, res) => {
+  const material = await materials.findById(req.params.id);
   if (!material) return res.status(404).json({ error: "Material not found." });
   const filePath = path.join(UPLOADS_DIR, material.file);
   if (!fs.existsSync(filePath)) return res.status(404).json({ error: "File no longer available." });
@@ -42,9 +41,8 @@ router.get("/materials/:id/file", requireAuth, (req, res) => {
 });
 
 // Renders the file inline (no forced download) so it can be previewed before downloading.
-router.get("/materials/:id/preview", requireAuth, (req, res) => {
-  const db = store.read();
-  const material = db.materials.find((m) => m.id === req.params.id);
+router.get("/materials/:id/preview", requireAuth, async (req, res) => {
+  const material = await materials.findById(req.params.id);
   if (!material) return res.status(404).json({ error: "Material not found." });
   const filePath = path.join(UPLOADS_DIR, material.file);
   if (!fs.existsSync(filePath)) return res.status(404).json({ error: "File no longer available." });
@@ -61,7 +59,7 @@ router.post("/admin/materials", requireAuth, requireAdmin, (req, res) => {
       return res.status(400).json({ error: "Title and a file are required." });
     }
 
-    const material = {
+    const material = await materials.create({
       id: crypto.randomUUID(),
       title: title.trim(),
       category: category || "General",
@@ -69,11 +67,6 @@ router.post("/admin/materials", requireAuth, requireAdmin, (req, res) => {
       file: req.file.filename,
       originalName: req.file.originalname,
       uploadedBy: req.auth.sub,
-      uploadedAt: new Date().toISOString(),
-    };
-
-    await store.mutate((db) => {
-      db.materials.push(material);
     });
 
     res.status(201).json({ material });
@@ -81,15 +74,9 @@ router.post("/admin/materials", requireAuth, requireAdmin, (req, res) => {
 });
 
 router.delete("/admin/materials/:id", requireAuth, requireAdmin, async (req, res) => {
-  const result = await store.mutate((db) => {
-    const idx = db.materials.findIndex((m) => m.id === req.params.id);
-    if (idx === -1) return { error: "Material not found." };
-    const [removed] = db.materials.splice(idx, 1);
-    return { removed };
-  });
-
-  if (result.error) return res.status(404).json({ error: result.error });
-  const filePath = path.join(UPLOADS_DIR, result.removed.file);
+  const removed = await materials.remove(req.params.id);
+  if (!removed) return res.status(404).json({ error: "Material not found." });
+  const filePath = path.join(UPLOADS_DIR, removed.file);
   fs.unlink(filePath, () => {});
   res.json({ ok: true });
 });

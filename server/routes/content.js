@@ -1,12 +1,12 @@
 import { Router } from "express";
-import { store } from "../lib/store.js";
+import * as events from "../db/events.js";
 import { requireAuth } from "../lib/auth.js";
 
 const router = Router();
 
-router.get("/events", requireAuth, (req, res) => {
-  const db = store.read();
-  res.json({ events: db.events });
+router.get("/events", requireAuth, async (req, res) => {
+  const list = await events.list();
+  res.json({ events: list });
 });
 
 export default router;

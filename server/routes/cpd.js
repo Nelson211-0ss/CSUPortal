@@ -3,7 +3,9 @@ import multer from "multer";
 import path from "node:path";
 import fs from "node:fs";
 import crypto from "node:crypto";
-import { store, UPLOADS_DIR } from "../lib/store.js";
+import * as cpd from "../db/cpd.js";
+import * as users from "../db/users.js";
+import { UPLOADS_DIR } from "../lib/uploads.js";
 import { requireAuth, requireAdmin, requireRole } from "../lib/auth.js";
 import { sendInline } from "../lib/files.js";
 
@@ -55,7 +57,7 @@ router.post("/cpd", requireAuth, requireRole("professional"), (req, res) => {
       return res.status(400).json({ error: "CPD points claimed must be a valid non-negative number." });
     }
 
-    const submission = {
+    const submission = await cpd.create({
       id: crypto.randomUUID(),
       userId: req.auth.sub,
       name: body.name.trim(),
@@ -72,32 +74,19 @@ router.post("/cpd", requireAuth, requireRole("professional"), (req, res) => {
       notes: body.notes || "",
       evidenceFile: req.file ? req.file.filename : null,
       evidenceOriginalName: req.file ? req.file.originalname : null,
-      status: "Pending",
-      submittedAt: new Date().toISOString(),
-      verifiedAt: null,
-      verifiedBy: null,
-      reviewNote: "",
-    };
-
-    await store.mutate((db) => {
-      db.cpdSubmissions.push(submission);
     });
 
     res.status(201).json({ submission });
   });
 });
 
-router.get("/cpd", requireAuth, (req, res) => {
-  const db = store.read();
-  const mine = db.cpdSubmissions
-    .filter((s) => s.userId === req.auth.sub)
-    .sort((a, b) => new Date(b.submittedAt) - new Date(a.submittedAt));
+router.get("/cpd", requireAuth, async (req, res) => {
+  const mine = await cpd.listByUser(req.auth.sub);
   res.json({ submissions: mine });
 });
 
-router.get("/cpd/:id/evidence", requireAuth, (req, res) => {
-  const db = store.read();
-  const submission = db.cpdSubmissions.find((s) => s.id === req.params.id);
+router.get("/cpd/:id/evidence", requireAuth, async (req, res) => {
+  const submission = await cpd.findById(req.params.id);
   if (!submission) return res.status(404).json({ error: "Submission not found." });
   const isOwner = submission.userId === req.auth.sub;
   const isAdmin = req.auth.role === "admin";
@@ -110,9 +99,8 @@ router.get("/cpd/:id/evidence", requireAuth, (req, res) => {
 });
 
 // Renders the evidence file inline so it can be previewed before downloading.
-router.get("/cpd/:id/evidence/preview", requireAuth, (req, res) => {
-  const db = store.read();
-  const submission = db.cpdSubmissions.find((s) => s.id === req.params.id);
+router.get("/cpd/:id/evidence/preview", requireAuth, async (req, res) => {
+  const submission = await cpd.findById(req.params.id);
   if (!submission) return res.status(404).json({ error: "Submission not found." });
   const isOwner = submission.userId === req.auth.sub;
   if (!isOwner && req.auth.role !== "admin") return res.status(403).json({ error: "Not authorized to view this file." });
@@ -123,15 +111,14 @@ router.get("/cpd/:id/evidence/preview", requireAuth, (req, res) => {
   sendInline(res, filePath, submission.evidenceOriginalName || submission.evidenceFile);
 });
 
-router.get("/cpd/:id/certificate", requireAuth, (req, res) => {
-  const db = store.read();
-  const submission = db.cpdSubmissions.find((s) => s.id === req.params.id);
+router.get("/cpd/:id/certificate", requireAuth, async (req, res) => {
+  const submission = await cpd.findById(req.params.id);
   if (!submission) return res.status(404).json({ error: "Submission not found." });
   const isOwner = submission.userId === req.auth.sub;
   if (!isOwner && req.auth.role !== "admin") return res.status(403).json({ error: "Not authorized to view this certificate." });
   if (submission.status !== "Verified") return res.status(400).json({ error: "Only verified activities have a certificate." });
 
-  const verifier = db.users.find((u) => u.id === submission.verifiedBy);
+  const verifier = submission.verifiedBy ? await users.findById(submission.verifiedBy) : null;
   const escape = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 
   res.set("Content-Type", "text/html").send(`<!doctype html>
@@ -176,9 +163,8 @@ router.get("/cpd/:id/certificate", requireAuth, (req, res) => {
 </html>`);
 });
 
-router.get("/admin/cpd", requireAuth, requireAdmin, (req, res) => {
-  const db = store.read();
-  const all = [...db.cpdSubmissions].sort((a, b) => new Date(b.submittedAt) - new Date(a.submittedAt));
+router.get("/admin/cpd", requireAuth, requireAdmin, async (req, res) => {
+  const all = await cpd.listAll();
   res.json({ submissions: all });
 });
 
@@ -188,18 +174,11 @@ router.patch("/admin/cpd/:id/verify", requireAuth, requireAdmin, async (req, res
     return res.status(400).json({ error: "Status must be 'Verified' or 'Rejected'." });
   }
 
-  const result = await store.mutate((db) => {
-    const submission = db.cpdSubmissions.find((s) => s.id === req.params.id);
-    if (!submission) return { error: "Submission not found." };
-    submission.status = status;
-    submission.verifiedAt = new Date().toISOString();
-    submission.verifiedBy = req.auth.sub;
-    submission.reviewNote = reviewNote || "";
-    return { submission };
-  });
+  const existing = await cpd.findById(req.params.id);
+  if (!existing) return res.status(404).json({ error: "Submission not found." });
 
-  if (result.error) return res.status(404).json({ error: result.error });
-  res.json({ submission: result.submission });
+  const submission = await cpd.verify(req.params.id, { status, verifiedBy: req.auth.sub, reviewNote });
+  res.json({ submission });
 });
 
 export default router;

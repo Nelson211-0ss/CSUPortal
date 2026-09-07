@@ -7,21 +7,28 @@ by a real Express API with persistent storage and file uploads.
 ## Stack
 
 - **Frontend:** React 18 + Vite + Tailwind CSS 4 + React Router
-- **Backend:** Node/Express, JSON-file storage (no database server to install), JWT auth in an httpOnly cookie,
-  file uploads via Multer
+- **Backend:** Node/Express, **PostgreSQL** (via `pg`), JWT auth in an httpOnly cookie, file uploads via Multer
 - **Dev proxy:** Vite proxies `/api/*` to the backend on port 4310, so both run on one origin during development
 
 ## Run locally
 
+Needs a Postgres instance. The easiest way is the included `docker-compose.yml`:
+
 ```bash
+docker compose up -d          # Postgres on localhost:5432
+cp .env.example .env          # DATABASE_URL already matches docker-compose.yml
 npm install
+npm run db:migrate            # creates tables and seeds the admin account
 npm run dev:all
 ```
 
 This starts the Vite dev server (http://localhost:5173) and the API server (http://localhost:4310) together. Open
 http://localhost:5173.
 
-To run them separately:
+No Docker? Point `DATABASE_URL` in `.env` at any Postgres 13+ instance (local install or a free-tier managed one —
+Neon, Supabase, Railway all work) and run `npm run db:migrate` against it instead.
+
+To run frontend/backend separately:
 
 ```bash
 npm run server   # API on http://localhost:4310
@@ -30,7 +37,8 @@ npm run dev      # frontend on http://localhost:5173
 
 ### Seeded admin account
 
-On first run the backend seeds one admin account so you can review submissions immediately:
+`npm run db:migrate` seeds one admin account (only if the `users` table is empty) so you can review submissions
+immediately:
 
 - Email: `admin@csu.ug`
 - Password: `Admin@123`
@@ -39,9 +47,10 @@ Anyone can self-register a professional account from the landing page.
 
 ## Data storage
 
-The backend stores data in `server/data/db.json` (users and CPD submissions) and uploaded certificates in
-`server/data/uploads/`. Both are created automatically on first run and are gitignored — delete `server/data` to
-reset to a clean seeded state.
+Structured data (users, CPD submissions, materials, events) lives in Postgres — see `server/db/schema.sql` for the
+full schema and `server/db/migrate.js` for the migration/seed script (safe to re-run; it only creates what's
+missing). Uploaded files (CPD evidence, CPD materials) still live on local disk, under `server/data/uploads/`
+(gitignored) — back this directory up separately from the database.
 
 ## Features
 
@@ -118,7 +127,16 @@ Requires Node 18.18+.
 ```bash
 git clone <your-repo> csu-portal && cd csu-portal
 npm ci
-cp .env.example .env   # fill in JWT_SECRET and CLIENT_ORIGINS at minimum
+cp .env.example .env   # fill in DATABASE_URL, JWT_SECRET and CLIENT_ORIGINS at minimum
+```
+
+**Database:** either install Postgres on the VPS itself (`apt install postgresql`, create a database/user, point
+`DATABASE_URL` at `postgres://user:pass@localhost:5432/csu_portal`) or use a managed provider (Neon, Supabase,
+Railway, etc. all have a free tier — just paste the connection string they give you into `DATABASE_URL`, and set
+`PGSSL=true` if they require it). Either way, run the migration once before starting the app:
+
+```bash
+npm run db:migrate
 ```
 
 Generate a real secret (do **not** ship the dev default):
@@ -184,8 +202,8 @@ server {
 }
 ```
 
-`server/data/` (the JSON database and uploaded files) lives outside `dist`/the build output — back it up, and don't
-let a redeploy step wipe the VPS working directory.
+`server/data/uploads/` (the uploaded evidence and materials files) lives outside `dist`/the build output — back it
+up (alongside regular Postgres backups), and don't let a redeploy step wipe the VPS working directory.
 
 ### 2. Frontend (Vercel)
 
@@ -224,17 +242,18 @@ To sanity-check the whole cross-origin setup before deploying:
 ```bash
 VITE_API_URL=http://localhost:4310/api npm run build
 npx vite preview --port 4173                                           # frontend, terminal 1
-NODE_ENV=production JWT_SECRET=<generated> CLIENT_ORIGINS=http://localhost:4173 npm run server   # terminal 2
+NODE_ENV=production JWT_SECRET=<generated> CLIENT_ORIGINS=http://localhost:4173 DATABASE_URL=<your-db-url> npm run server   # terminal 2
 ```
 
 Then open http://localhost:4173 — this is the same cross-origin shape as Vercel + VPS, just both on localhost.
 
 ## Production checklist
 
+- [ ] `DATABASE_URL` points at a real Postgres instance and `npm run db:migrate` has been run against it
 - [ ] `JWT_SECRET` set to a random 32+ character value (the server refuses to start in production without one)
 - [ ] `CLIENT_ORIGINS` lists every frontend origin that needs to log in
 - [ ] Backend served over HTTPS (required for the session cookie to be sent at all in production)
 - [ ] `VITE_API_URL` set in Vercel and the frontend redeployed after any change to it
 - [ ] Change the seeded admin password (`admin@csu.ug` / `Admin@123`) immediately after first deploy, or create a
       fresh admin via Member Management and demote/remove the seeded one
-- [ ] `server/data/` is backed up and excluded from anything that redeploys/wipes the VPS app directory
+- [ ] Both Postgres and `server/data/uploads/` are backed up on a regular schedule

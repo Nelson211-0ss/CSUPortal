@@ -1,7 +1,7 @@
 import { Router } from "express";
 import bcrypt from "bcryptjs";
 import crypto from "node:crypto";
-import { store } from "../lib/store.js";
+import * as users from "../db/users.js";
 import { signToken, requireAuth, publicUser, COOKIE_NAME, COOKIE_OPTS } from "../lib/auth.js";
 
 const router = Router();
@@ -45,33 +45,32 @@ router.post("/register", async (req, res) => {
   }
   const normalizedEmail = String(email).trim().toLowerCase();
 
-  const result = await store.mutate((db) => {
-    if (db.users.some((u) => u.email.toLowerCase() === normalizedEmail)) {
-      return { error: "An account with this email already exists." };
-    }
-    const user = {
+  if (await users.findByEmail(normalizedEmail)) {
+    return res.status(409).json({ error: "An account with this email already exists." });
+  }
+
+  let user;
+  try {
+    user = await users.create({
       id: crypto.randomUUID(),
       name: String(name).trim(),
       email: normalizedEmail,
       passwordHash: bcrypt.hashSync(password, 10),
       role: "professional",
-      status: "active",
       professionalCategory: professionalCategory || "",
       licenceNumber: licenceNumber || "",
       phone: phone || "",
       institution: institution || "",
       designation: designation || "",
-      createdAt: new Date().toISOString(),
-    };
-    db.users.push(user);
-    return { user };
-  });
+    });
+  } catch (err) {
+    if (err.code === "23505") return res.status(409).json({ error: "An account with this email already exists." });
+    throw err;
+  }
 
-  if (result.error) return res.status(409).json({ error: result.error });
-
-  const token = signToken(result.user);
+  const token = signToken(user);
   res.cookie(COOKIE_NAME, token, COOKIE_OPTS);
-  res.status(201).json({ user: publicUser(result.user) });
+  res.status(201).json({ user: publicUser(user) });
 });
 
 router.post("/login", async (req, res) => {
@@ -83,8 +82,7 @@ router.post("/login", async (req, res) => {
     return res.status(429).json({ error: "Too many failed attempts. Please try again in a few minutes." });
   }
 
-  const db = store.read();
-  const user = db.users.find((u) => u.email.toLowerCase() === normalizedEmail);
+  const user = await users.findByEmail(normalizedEmail);
   if (!user || !bcrypt.compareSync(password, user.passwordHash)) {
     recordFailedAttempt(normalizedEmail);
     return res.status(401).json({ error: "Invalid email or password." });

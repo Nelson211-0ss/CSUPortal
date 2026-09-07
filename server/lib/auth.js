@@ -1,5 +1,5 @@
 import jwt from "jsonwebtoken";
-import { store } from "./store.js";
+import * as users from "../db/users.js";
 
 // index.js refuses to start in production without a real JWT_SECRET; this
 // fallback only ever applies to local development.
@@ -33,7 +33,7 @@ export function signToken(user) {
 // Verifies the session AND re-checks the account's current role/status against the
 // database on every request, so a suspended or demoted account loses access immediately
 // rather than only when its (up to 7-day-old) token expires.
-export function requireAuth(req, res, next) {
+export async function requireAuth(req, res, next) {
   const token = req.cookies?.[COOKIE_NAME];
   if (!token) return res.status(401).json({ error: "Not authenticated." });
 
@@ -44,8 +44,7 @@ export function requireAuth(req, res, next) {
     return res.status(401).json({ error: "Session expired. Please log in again." });
   }
 
-  const db = store.read();
-  const user = db.users.find((u) => u.id === payload.sub);
+  const user = await users.findById(payload.sub);
   if (!user) return res.status(401).json({ error: "This account no longer exists." });
   if (user.status === "suspended") {
     return res.status(403).json({ error: "Your account has been suspended. Contact CSU administration." });

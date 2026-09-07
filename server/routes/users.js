@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { store } from "../lib/store.js";
+import * as users from "../db/users.js";
 import { requireAuth, publicUser } from "../lib/auth.js";
 
 const router = Router();
@@ -19,15 +19,9 @@ router.put("/me", requireAuth, async (req, res) => {
     if (req.body?.[field] !== undefined) updates[field] = String(req.body[field]).trim();
   }
 
-  const result = await store.mutate((db) => {
-    const user = db.users.find((u) => u.id === req.auth.sub);
-    if (!user) return { error: "User not found." };
-    Object.assign(user, updates);
-    return { user };
-  });
-
-  if (result.error) return res.status(404).json({ error: result.error });
-  res.json({ user: publicUser(result.user) });
+  const user = await users.updateProfile(req.auth.sub, updates);
+  if (!user) return res.status(404).json({ error: "User not found." });
+  res.json({ user: publicUser(user) });
 });
 
 export default router;
