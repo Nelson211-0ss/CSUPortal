@@ -1,4 +1,8 @@
-const BASE = "/api";
+// In dev this stays "/api" and rides Vite's proxy. In production, set
+// VITE_API_URL (in a Vercel env var) to the VPS backend's full origin, e.g.
+// "https://api.example.org/api" — the frontend and backend are on different
+// domains, so a relative path won't reach the backend.
+const BASE = (import.meta.env.VITE_API_URL || "/api").replace(/\/$/, "");
 
 async function request(path, opts = {}) {
   const isForm = opts.body instanceof FormData;
@@ -33,6 +37,7 @@ export const api = {
   listCpd: () => request("/cpd"),
   submitCpd: (formData) => request("/cpd", { method: "POST", body: formData }),
   evidenceUrl: (id) => `${BASE}/cpd/${id}/evidence`,
+  evidencePreviewUrl: (id) => `${BASE}/cpd/${id}/evidence/preview`,
   certificateUrl: (id) => `${BASE}/cpd/${id}/certificate`,
 
   adminListCpd: () => request("/admin/cpd"),
@@ -42,10 +47,12 @@ export const api = {
 
   listMaterials: () => request("/materials"),
   materialFileUrl: (id) => `${BASE}/materials/${id}/file`,
+  materialPreviewUrl: (id) => `${BASE}/materials/${id}/preview`,
   uploadMaterial: (formData) => request("/admin/materials", { method: "POST", body: formData }),
   deleteMaterial: (id) => request(`/admin/materials/${id}`, { method: "DELETE" }),
 
   adminListUsers: () => request("/admin/users"),
+  createUser: (payload) => request("/admin/users", { method: "POST", body: JSON.stringify(payload) }),
   updateUserStatus: (id, status) => request(`/admin/users/${id}/status`, { method: "PATCH", body: JSON.stringify({ status }) }),
   updateUserRole: (id, role) => request(`/admin/users/${id}/role`, { method: "PATCH", body: JSON.stringify({ role }) }),
   adminAnalytics: () => request("/admin/analytics"),

@@ -2,16 +2,9 @@ import { Router } from "express";
 import bcrypt from "bcryptjs";
 import crypto from "node:crypto";
 import { store } from "../lib/store.js";
-import { signToken, requireAuth, publicUser, COOKIE_NAME } from "../lib/auth.js";
+import { signToken, requireAuth, publicUser, COOKIE_NAME, COOKIE_OPTS } from "../lib/auth.js";
 
 const router = Router();
-
-const COOKIE_OPTS = {
-  httpOnly: true,
-  sameSite: "lax",
-  secure: process.env.NODE_ENV === "production",
-  maxAge: 7 * 24 * 60 * 60 * 1000,
-};
 
 // Basic brute-force throttle: after 5 failed attempts for an email, block further
 // attempts for 5 minutes. In-memory only — resets on server restart, which is fine

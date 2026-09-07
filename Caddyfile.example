@@ -1,0 +1,12 @@
+# Copy this to /etc/caddy/Caddyfile on the VPS (or wherever Caddy reads its
+# config from), swap in your actual hostname, then `sudo systemctl reload caddy`.
+# Caddy fetches and renews the HTTPS certificate automatically — no certbot,
+# no cron job.
+#
+# No domain yet? Use a free wildcard-DNS hostname for your VPS's IP, e.g.
+# 203.0.113.10 -> 203-0-113-10.sslip.io (see README.md's "No domain name yet?"
+# section). It works exactly like a real domain here.
+
+your-hostname-or-ip.sslip.io {
+    reverse_proxy localhost:4310
+}

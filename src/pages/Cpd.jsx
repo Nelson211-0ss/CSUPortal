@@ -1,14 +1,15 @@
 import { useEffect, useState } from "react";
 import { useOutletContext } from "react-router-dom";
-import { Award, Download, GraduationCap } from "lucide-react";
+import { Award, Download, Eye, GraduationCap } from "lucide-react";
 import { api } from "../api";
-import { Card, MiniMetric, PageIntro, ActivityTable } from "../components/ui";
+import { Card, MiniMetric, PageIntro, ActivityTable, PreviewModal } from "../components/ui";
 
 export default function Cpd() {
   const { notify } = useOutletContext();
   const [submissions, setSubmissions] = useState([]);
   const [filter, setFilter] = useState("All");
   const [loading, setLoading] = useState(true);
+  const [preview, setPreview] = useState(null);
 
   useEffect(() => {
     api
@@ -50,6 +51,11 @@ export default function Cpd() {
             actions={(a) => (
               <div className="flex items-center justify-end gap-1">
                 {a.evidenceFile && (
+                  <button onClick={() => setPreview(a)} title="Preview evidence" className="inline-flex items-center gap-1 rounded-lg px-2 py-2 text-xs font-semibold text-[#2563eb] hover:bg-[#eaf1fe]">
+                    <Eye size={14} />
+                  </button>
+                )}
+                {a.evidenceFile && (
                   <a href={api.evidenceUrl(a.id)} title="Download evidence" className="inline-flex items-center gap-1 rounded-lg px-2 py-2 text-xs font-semibold text-[#7c3aed] hover:bg-[#f3ebfd]">
                     <Download size={14} />
                   </a>
@@ -71,6 +77,15 @@ export default function Cpd() {
           />
         )}
       </Card>
+      {preview && (
+        <PreviewModal
+          title={preview.activityTitle}
+          filename={preview.evidenceOriginalName}
+          previewUrl={api.evidencePreviewUrl(preview.id)}
+          downloadUrl={api.evidenceUrl(preview.id)}
+          onClose={() => setPreview(null)}
+        />
+      )}
     </div>
   );
 }

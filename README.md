@@ -55,10 +55,13 @@ reset to a clean seeded state.
 - Admin "CPD Verification" area to review, verify or reject submitted evidence
 - Admin "CPD Materials" library — publish/remove official CPD guidelines and training resources; members browse and
   download them from Resources
-- Admin "Member Management" — suspend/reactivate accounts and promote/demote roles, with safeguards (an admin cannot
-  suspend or demote themselves, and the last remaining admin cannot be demoted)
+- Admin "Member Management" — create new accounts with an assigned role, suspend/reactivate accounts, and
+  promote/demote roles, with safeguards (an admin cannot suspend or demote themselves, and the last remaining admin
+  cannot be demoted)
 - Admin "Compliance Analytics" — membership, submission-status and category breakdowns, and an annual-target
   compliance rate
+- Inline preview (PDF/image, before downloading) for CPD materials and CPD evidence
+- Profile menu in the top bar (name, email, view profile, log out) instead of a sidebar logout button
 - Editable professional profile, persisted server-side
 - Events page backed by an API endpoint
 - Blue / pink / purple / white / black visual theme
@@ -71,8 +74,13 @@ reset to a clean seeded state.
   submissions, manage members, or publish CPD materials.
 - An admin cannot suspend or demote their own account, and the last remaining admin account cannot be demoted —
   prevents accidental lockout.
-- Login is throttled after 5 failed attempts per email (5-minute cooldown) to slow down brute-force attempts.
+- Login is throttled after 5 failed attempts per email (5-minute cooldown), plus a general 300-req/15-min rate limit
+  across the whole API as defense-in-depth.
 - Evidence files and certificates are only downloadable by the submission's owner or an admin.
+- `helmet` security headers, `compression`, and `trust proxy` (for correct client IPs/secure cookies behind a reverse
+  proxy) are enabled. CSP and the X-Frame-Options header are deliberately relaxed — the API intentionally serves
+  file previews and a certificate page meant to be embedded by the frontend, which lives on a different origin.
+- The server refuses to start in production without a real `JWT_SECRET` (32+ characters) — no insecure fallback.
 
 ## API
 
@@ -87,21 +95,146 @@ All endpoints are under `/api`. Except `/auth/register` and `/auth/login`, all r
 - `GET /api/admin/cpd` — list all submissions (admin only)
 - `PATCH /api/admin/cpd/:id/verify` — mark `Verified` or `Rejected` (admin only)
 - `GET /api/materials` — list published CPD materials
-- `GET /api/materials/:id/file` — download a material
+- `GET /api/materials/:id/file` — download a material (forces download)
+- `GET /api/materials/:id/preview` — render a material inline (PDF/image) for in-browser preview
 - `POST /api/admin/materials` / `DELETE /api/admin/materials/:id` — publish/remove a material (admin only)
+- `GET /api/cpd/:id/evidence/preview` — render CPD evidence inline for in-browser preview (owner or admin only)
 - `GET /api/admin/users` — list all accounts (admin only)
+- `POST /api/admin/users` — create an account directly with an assigned role (admin only)
 - `PATCH /api/admin/users/:id/status` — set `active`/`suspended` (admin only)
 - `PATCH /api/admin/users/:id/role` — set `professional`/`admin` (admin only)
 - `GET /api/admin/analytics` — membership and compliance statistics (admin only)
 - `GET /api/events`
 
-## Production build
+## Deployment: frontend on Vercel, backend on a VPS
+
+The frontend and backend are deployed and run independently, on two different origins. Copy `.env.example` for the
+full list of variables — the essentials are below.
+
+### 1. Backend (VPS)
+
+Requires Node 18.18+.
 
 ```bash
-npm run build
-npm run preview
+git clone <your-repo> csu-portal && cd csu-portal
+npm ci
+cp .env.example .env   # fill in JWT_SECRET and CLIENT_ORIGINS at minimum
 ```
 
-For a real deployment: move `JWT_SECRET` into an environment variable, put the backend behind HTTPS, set
-`CLIENT_ORIGIN`/cookie `secure` appropriately, and consider moving from the JSON-file store to a real database if
-concurrent write volume grows.
+Generate a real secret (do **not** ship the dev default):
+
+```bash
+node -e "console.log(require('crypto').randomBytes(48).toString('hex'))"
+```
+
+Run it under a process manager so it survives crashes and reboots:
+
+```bash
+npm install -g pm2
+pm2 start ecosystem.config.cjs
+pm2 save && pm2 startup
+```
+
+Put it behind a reverse proxy that terminates TLS — **this is not optional**: the production cookie config
+(`SameSite=None; Secure`) means browsers will silently refuse to send it at all over plain HTTP, so login will
+appear to "not stick" until the backend is served over HTTPS.
+
+#### No domain name yet?
+
+You don't need to buy one to get HTTPS working. Free wildcard-DNS services resolve `<your-vps-ip-with-dots-as-dashes>.sslip.io`
+straight to that IP with zero DNS setup — e.g. VPS IP `203.0.113.10` → hostname `203-0-113-10.sslip.io`. That's a
+real, publicly resolvable hostname, which is all Let's Encrypt needs to issue a valid certificate. (`nip.io` works
+the same way, if you prefer.) Use that hostname everywhere this guide says `api.yourdomain.org`, for both
+`CLIENT_ORIGINS`/`VITE_API_URL` and the reverse-proxy config below. When you're ready for a permanent setup, buy a
+cheap domain (~$10–15/yr from Namecheap, Porkbun, Cloudflare Registrar, etc.), point an A record at the VPS IP, and
+swap the hostname — nothing else in the app needs to change.
+
+**Caddy** is the easiest option here — it fetches and renews the certificate automatically, no certbot/cron
+needed, and it works with an sslip.io hostname exactly like a real domain:
+
+```caddyfile
+# /etc/caddy/Caddyfile — see Caddyfile.example in this repo
+203-0-113-10.sslip.io {
+    reverse_proxy localhost:4310
+}
+```
+
+```bash
+sudo apt install -y caddy   # or see https://caddyserver.com/docs/install
+sudo systemctl reload caddy
+```
+
+If you already run nginx, this works too (point `certbot --nginx` at the same hostname):
+
+```nginx
+server {
+    listen 443 ssl;
+    server_name 203-0-113-10.sslip.io;   # or your real domain, once you have one
+
+    ssl_certificate     /etc/letsencrypt/live/203-0-113-10.sslip.io/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/203-0-113-10.sslip.io/privkey.pem;
+
+    location / {
+        proxy_pass http://localhost:4310;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+```
+
+`server/data/` (the JSON database and uploaded files) lives outside `dist`/the build output — back it up, and don't
+let a redeploy step wipe the VPS working directory.
+
+### 2. Frontend (Vercel)
+
+Import the repo into Vercel — it auto-detects the Vite project (build command `npm run build`, output `dist`).
+`vercel.json` in this repo adds the SPA rewrite Vercel needs so client-side routes (`/dashboard`, `/admin/users`, …)
+work on direct load/refresh, not just in-app navigation.
+
+In **Project Settings → Environment Variables**, add:
+
+```
+VITE_API_URL = https://api.yourdomain.org/api
+```
+
+(Vite env vars are baked in at build time — redeploy after changing this.)
+
+### 3. Point them at each other
+
+On the VPS, set `CLIENT_ORIGINS` to your Vercel URL(s), comma-separated if there's more than one (e.g. the
+production domain and a custom domain):
+
+```
+CLIENT_ORIGINS=https://your-app.vercel.app,https://portal.yourdomain.org
+```
+
+**Cookie domain note:** the frontend (Vercel) and backend (VPS) are different registrable domains by default, so the
+session cookie must use `SameSite=None; Secure` to survive cross-site requests — this is the production default
+already. Some browsers restrict such "third-party" cookies more aggressively over time; if you can, put both
+services under the **same** registrable domain instead (e.g. `app.yourdomain.org` on Vercel + `api.yourdomain.org`
+on the VPS) and set `COOKIE_SAMESITE=lax` — same-domain cookies aren't subject to those restrictions and it's the
+more conventional, defense-in-depth setup.
+
+### Local production dry run
+
+To sanity-check the whole cross-origin setup before deploying:
+
+```bash
+VITE_API_URL=http://localhost:4310/api npm run build
+npx vite preview --port 4173                                           # frontend, terminal 1
+NODE_ENV=production JWT_SECRET=<generated> CLIENT_ORIGINS=http://localhost:4173 npm run server   # terminal 2
+```
+
+Then open http://localhost:4173 — this is the same cross-origin shape as Vercel + VPS, just both on localhost.
+
+## Production checklist
+
+- [ ] `JWT_SECRET` set to a random 32+ character value (the server refuses to start in production without one)
+- [ ] `CLIENT_ORIGINS` lists every frontend origin that needs to log in
+- [ ] Backend served over HTTPS (required for the session cookie to be sent at all in production)
+- [ ] `VITE_API_URL` set in Vercel and the frontend redeployed after any change to it
+- [ ] Change the seeded admin password (`admin@csu.ug` / `Admin@123`) immediately after first deploy, or create a
+      fresh admin via Member Management and demote/remove the seeded one
+- [ ] `server/data/` is backed up and excluded from anything that redeploys/wipes the VPS app directory

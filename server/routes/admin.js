@@ -1,4 +1,6 @@
 import { Router } from "express";
+import bcrypt from "bcryptjs";
+import crypto from "node:crypto";
 import { store } from "../lib/store.js";
 import { requireAuth, requireAdmin, publicUser } from "../lib/auth.js";
 
@@ -12,6 +14,47 @@ router.get("/admin/users", requireAuth, requireAdmin, (req, res) => {
     .map(publicUser)
     .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
   res.json({ users });
+});
+
+// Lets an admin create an account directly (professional or admin) with a role
+// assigned up front, rather than waiting for the person to self-register.
+router.post("/admin/users", requireAuth, requireAdmin, async (req, res) => {
+  const { name, email, password, role, professionalCategory, licenceNumber, phone, institution, designation } = req.body || {};
+  if (!name || !email || !password) {
+    return res.status(400).json({ error: "Name, email and password are required." });
+  }
+  if (String(password).length < 6) {
+    return res.status(400).json({ error: "Password must be at least 6 characters." });
+  }
+  if (!["professional", "admin"].includes(role)) {
+    return res.status(400).json({ error: "Role must be 'professional' or 'admin'." });
+  }
+  const normalizedEmail = String(email).trim().toLowerCase();
+
+  const result = await store.mutate((db) => {
+    if (db.users.some((u) => u.email.toLowerCase() === normalizedEmail)) {
+      return { error: "An account with this email already exists." };
+    }
+    const user = {
+      id: crypto.randomUUID(),
+      name: String(name).trim(),
+      email: normalizedEmail,
+      passwordHash: bcrypt.hashSync(password, 10),
+      role,
+      status: "active",
+      professionalCategory: professionalCategory || "",
+      licenceNumber: licenceNumber || "",
+      phone: phone || "",
+      institution: institution || "",
+      designation: designation || "",
+      createdAt: new Date().toISOString(),
+    };
+    db.users.push(user);
+    return { user };
+  });
+
+  if (result.error) return res.status(409).json({ error: result.error });
+  res.status(201).json({ user: publicUser(result.user) });
 });
 
 router.patch("/admin/users/:id/status", requireAuth, requireAdmin, async (req, res) => {

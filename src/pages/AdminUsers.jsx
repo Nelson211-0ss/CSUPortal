@@ -1,9 +1,63 @@
 import { useEffect, useState } from "react";
 import { useOutletContext } from "react-router-dom";
-import { ShieldCheck, ShieldOff, UserCog, Users } from "lucide-react";
+import { Lock, Mail, Plus, ShieldCheck, ShieldOff, Stethoscope, User, UserCog, Users, X } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { api } from "../api";
-import { Card, MiniMetric, PageIntro } from "../components/ui";
+import { Card, Field, MiniMetric, PageIntro } from "../components/ui";
+
+const CATEGORIES = ["Cytotechnologist", "Laboratory Technologist", "Pathologist", "Medical Officer", "Nurse", "Student", "Dentist", "Other"];
+
+function CreateUserModal({ onClose, onCreated, notify }) {
+  const [form, setForm] = useState({ name: "", email: "", password: "", role: "professional", professionalCategory: CATEGORIES[0] });
+  const [submitting, setSubmitting] = useState(false);
+
+  const set = (key) => (e) => setForm((f) => ({ ...f, [key]: e.target.value }));
+
+  const submit = async (e) => {
+    e.preventDefault();
+    setSubmitting(true);
+    try {
+      const payload = { ...form };
+      if (payload.role === "admin") delete payload.professionalCategory;
+      await api.createUser(payload);
+      notify(`${form.name}'s account has been created.`);
+      onCreated();
+    } catch (err) {
+      notify(err.message);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-[110] grid place-items-center bg-slate-950/60 p-4" onClick={onClose}>
+      <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-2xl" onClick={(e) => e.stopPropagation()}>
+        <div className="mb-4 flex items-center justify-between">
+          <h3 className="text-sm font-extrabold text-slate-900">Add new user</h3>
+          <button onClick={onClose} className="rounded-lg p-2 text-slate-400 hover:bg-slate-100">
+            <X size={17} />
+          </button>
+        </div>
+        <form onSubmit={submit} className="space-y-4">
+          <Field label="Full name" required icon={User} value={form.name} onChange={set("name")} />
+          <Field label="Email address" required type="email" icon={Mail} value={form.email} onChange={set("email")} />
+          <Field label="Temporary password" required type="password" icon={Lock} revealable minLength={6} value={form.password} onChange={set("password")} placeholder="At least 6 characters" />
+          <Field label="Role" required select options={["professional", "admin"]} value={form.role} onChange={set("role")} />
+          {form.role === "professional" && (
+            <Field label="Professional category" select icon={Stethoscope} options={CATEGORIES} value={form.professionalCategory} onChange={set("professionalCategory")} />
+          )}
+          <button
+            type="submit"
+            disabled={submitting}
+            className="w-full rounded-md bg-[#7c3aed] px-4 py-3 text-sm font-extrabold text-white shadow-sm hover:bg-[#6d28d9] disabled:opacity-60"
+          >
+            {submitting ? "Creating..." : "Create account"}
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+}
 
 export default function AdminUsers() {
   const { notify } = useOutletContext();
@@ -12,6 +66,7 @@ export default function AdminUsers() {
   const [filter, setFilter] = useState("All");
   const [loading, setLoading] = useState(true);
   const [busyId, setBusyId] = useState(null);
+  const [showCreate, setShowCreate] = useState(false);
 
   const load = () => {
     setLoading(true);
@@ -61,7 +116,19 @@ export default function AdminUsers() {
 
   return (
     <div className="fade-up space-y-6">
-      <PageIntro title="Member management" text="Review CSU portal accounts, manage roles and control access." icon={Users} />
+      <PageIntro
+        title="Member management"
+        text="Review CSU portal accounts, manage roles and control access."
+        icon={Users}
+        action={
+          <button
+            onClick={() => setShowCreate(true)}
+            className="inline-flex items-center gap-2 rounded-md bg-[#7c3aed] px-4 py-2.5 text-sm font-bold text-white shadow-sm hover:bg-[#6d28d9]"
+          >
+            <Plus size={16} /> Add user
+          </button>
+        }
+      />
       <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3">
         <MiniMetric label="Professionals" value={totalProfessionals} suffix="accounts" />
         <MiniMetric label="Administrators" value={totalAdmins} suffix="accounts" />
@@ -141,6 +208,16 @@ export default function AdminUsers() {
           </div>
         )}
       </Card>
+      {showCreate && (
+        <CreateUserModal
+          notify={notify}
+          onClose={() => setShowCreate(false)}
+          onCreated={() => {
+            setShowCreate(false);
+            load();
+          }}
+        />
+      )}
     </div>
   );
 }

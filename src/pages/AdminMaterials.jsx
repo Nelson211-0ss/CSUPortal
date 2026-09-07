@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { useOutletContext } from "react-router-dom";
-import { BookOpen, Download, Trash2, UploadCloud } from "lucide-react";
+import { BookOpen, Download, Eye, Trash2, UploadCloud } from "lucide-react";
 import { api } from "../api";
-import { Card, Field, PageIntro } from "../components/ui";
+import { Card, Field, PageIntro, PreviewModal } from "../components/ui";
 
 const CATEGORIES = ["Guideline", "Reference", "Research", "Training Module"];
 
@@ -11,6 +11,7 @@ export default function AdminMaterials() {
   const [materials, setMaterials] = useState([]);
   const [loading, setLoading] = useState(true);
   const [busyId, setBusyId] = useState(null);
+  const [preview, setPreview] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const [form, setForm] = useState({ title: "", category: CATEGORIES[0], description: "" });
   const [file, setFile] = useState(null);
@@ -113,6 +114,9 @@ export default function AdminMaterials() {
                     <p className="mt-1 text-[11px] text-slate-400">Published {new Date(m.uploadedAt).toLocaleDateString()}</p>
                   </div>
                   <div className="flex shrink-0 items-center gap-1">
+                    <button onClick={() => setPreview(m)} className="rounded-lg p-2 text-slate-400 hover:bg-slate-100" title="Preview">
+                      <Eye size={16} />
+                    </button>
                     <a href={api.materialFileUrl(m.id)} className="rounded-lg p-2 text-slate-400 hover:bg-slate-100" title="Download">
                       <Download size={16} />
                     </a>
@@ -126,6 +130,15 @@ export default function AdminMaterials() {
           )}
         </Card>
       </div>
+      {preview && (
+        <PreviewModal
+          title={preview.title}
+          filename={preview.originalName}
+          previewUrl={api.materialPreviewUrl(preview.id)}
+          downloadUrl={api.materialFileUrl(preview.id)}
+          onClose={() => setPreview(null)}
+        />
+      )}
     </div>
   );
 }

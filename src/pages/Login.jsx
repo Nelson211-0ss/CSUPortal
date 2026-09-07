@@ -18,8 +18,8 @@ export default function Login() {
     setError("");
     setSubmitting(true);
     try {
-      const user = await login(email, password);
-      navigate(user.role === "admin" ? "/admin" : location.state?.from || "/dashboard", { replace: true });
+      await login(email, password);
+      navigate(location.state?.from || "/dashboard", { replace: true });
     } catch (err) {
       setError(err.message);
     } finally {

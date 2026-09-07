@@ -1,5 +1,43 @@
 import { useState } from "react";
-import { ArrowRight, Check, CheckCircle2, Clock3, Eye, EyeOff, MoreHorizontal, X } from "lucide-react";
+import { ArrowRight, Check, CheckCircle2, Clock3, Download, Eye, EyeOff, FileWarning, MoreHorizontal, X } from "lucide-react";
+
+const PREVIEWABLE_EXT = new Set(["pdf", "jpg", "jpeg", "png"]);
+
+export function PreviewModal({ title, previewUrl, downloadUrl, filename, onClose }) {
+  const ext = (filename || "").split(".").pop()?.toLowerCase();
+  const canPreview = PREVIEWABLE_EXT.has(ext);
+
+  return (
+    <div className="fixed inset-0 z-[110] grid place-items-center bg-slate-950/60 p-4" onClick={onClose}>
+      <div className="flex max-h-[85vh] w-full max-w-3xl flex-col rounded-lg bg-white shadow-2xl" onClick={(e) => e.stopPropagation()}>
+        <div className="flex items-center justify-between gap-3 border-b border-slate-100 p-4">
+          <h3 className="min-w-0 truncate text-sm font-extrabold text-slate-900">{title}</h3>
+          <div className="flex shrink-0 items-center gap-1">
+            <a href={downloadUrl} className="rounded-lg p-2 text-slate-400 hover:bg-slate-100" title="Download">
+              <Download size={17} />
+            </a>
+            <button onClick={onClose} className="rounded-lg p-2 text-slate-400 hover:bg-slate-100" title="Close">
+              <X size={17} />
+            </button>
+          </div>
+        </div>
+        <div className="min-h-[300px] flex-1 overflow-auto bg-slate-50">
+          {ext === "pdf" ? (
+            <iframe title={title} src={previewUrl} className="h-[75vh] w-full" />
+          ) : canPreview ? (
+            <img src={previewUrl} alt={title} className="mx-auto max-h-[75vh] object-contain" />
+          ) : (
+            <div className="flex h-full flex-col items-center justify-center gap-3 py-16 text-center text-sm text-slate-400">
+              <FileWarning size={28} />
+              Preview isn't available for this file type.
+              <a href={downloadUrl} className="font-bold text-[#7c3aed]">Download instead</a>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export function Card({ title, action, children, className = "" }) {
   return (

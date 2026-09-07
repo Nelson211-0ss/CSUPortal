@@ -5,6 +5,7 @@ import fs from "node:fs";
 import crypto from "node:crypto";
 import { store, UPLOADS_DIR } from "../lib/store.js";
 import { requireAuth, requireAdmin, requireRole } from "../lib/auth.js";
+import { sendInline } from "../lib/files.js";
 
 const router = Router();
 
@@ -106,6 +107,20 @@ router.get("/cpd/:id/evidence", requireAuth, (req, res) => {
   const filePath = path.join(UPLOADS_DIR, submission.evidenceFile);
   if (!fs.existsSync(filePath)) return res.status(404).json({ error: "File no longer available." });
   res.download(filePath, submission.evidenceOriginalName || submission.evidenceFile);
+});
+
+// Renders the evidence file inline so it can be previewed before downloading.
+router.get("/cpd/:id/evidence/preview", requireAuth, (req, res) => {
+  const db = store.read();
+  const submission = db.cpdSubmissions.find((s) => s.id === req.params.id);
+  if (!submission) return res.status(404).json({ error: "Submission not found." });
+  const isOwner = submission.userId === req.auth.sub;
+  if (!isOwner && req.auth.role !== "admin") return res.status(403).json({ error: "Not authorized to view this file." });
+  if (!submission.evidenceFile) return res.status(404).json({ error: "No evidence file for this submission." });
+
+  const filePath = path.join(UPLOADS_DIR, submission.evidenceFile);
+  if (!fs.existsSync(filePath)) return res.status(404).json({ error: "File no longer available." });
+  sendInline(res, filePath, submission.evidenceOriginalName || submission.evidenceFile);
 });
 
 router.get("/cpd/:id/certificate", requireAuth, (req, res) => {

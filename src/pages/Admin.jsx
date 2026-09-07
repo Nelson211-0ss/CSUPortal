@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { useOutletContext } from "react-router-dom";
-import { Check, ClipboardCheck, Download, X } from "lucide-react";
+import { Check, ClipboardCheck, Download, Eye, X } from "lucide-react";
 import { api } from "../api";
-import { Card, MiniMetric, PageIntro, Status } from "../components/ui";
+import { Card, MiniMetric, PageIntro, PreviewModal, Status } from "../components/ui";
 
 export default function Admin() {
   const { notify } = useOutletContext();
@@ -10,6 +10,7 @@ export default function Admin() {
   const [filter, setFilter] = useState("Pending");
   const [loading, setLoading] = useState(true);
   const [busyId, setBusyId] = useState(null);
+  const [preview, setPreview] = useState(null);
 
   const load = () => {
     setLoading(true);
@@ -79,9 +80,14 @@ export default function Admin() {
                     </p>
                   </div>
                   {s.evidenceFile && (
-                    <a href={api.evidenceUrl(s.id)} className="inline-flex items-center gap-1 rounded-lg border border-slate-200 px-3 py-2 text-xs font-bold text-[#7c3aed] hover:bg-[#f3ebfd]">
-                      <Download size={14} /> Evidence
-                    </a>
+                    <div className="flex items-center gap-2">
+                      <button onClick={() => setPreview(s)} className="inline-flex items-center gap-1 rounded-lg border border-slate-200 px-3 py-2 text-xs font-bold text-[#2563eb] hover:bg-[#eaf1fe]">
+                        <Eye size={14} /> Preview
+                      </button>
+                      <a href={api.evidenceUrl(s.id)} className="inline-flex items-center gap-1 rounded-lg border border-slate-200 px-3 py-2 text-xs font-bold text-[#7c3aed] hover:bg-[#f3ebfd]">
+                        <Download size={14} /> Evidence
+                      </a>
+                    </div>
                   )}
                 </div>
                 <div className="mt-3 grid gap-2 text-xs text-slate-500 sm:grid-cols-3">
@@ -117,6 +123,15 @@ export default function Admin() {
           </div>
         )}
       </Card>
+      {preview && (
+        <PreviewModal
+          title={preview.activityTitle}
+          filename={preview.evidenceOriginalName}
+          previewUrl={api.evidencePreviewUrl(preview.id)}
+          downloadUrl={api.evidenceUrl(preview.id)}
+          onClose={() => setPreview(null)}
+        />
+      )}
     </div>
   );
 }

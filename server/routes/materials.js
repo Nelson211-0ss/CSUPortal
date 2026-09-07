@@ -5,6 +5,7 @@ import fs from "node:fs";
 import crypto from "node:crypto";
 import { store, UPLOADS_DIR } from "../lib/store.js";
 import { requireAuth, requireAdmin } from "../lib/auth.js";
+import { sendInline } from "../lib/files.js";
 
 const router = Router();
 
@@ -38,6 +39,16 @@ router.get("/materials/:id/file", requireAuth, (req, res) => {
   const filePath = path.join(UPLOADS_DIR, material.file);
   if (!fs.existsSync(filePath)) return res.status(404).json({ error: "File no longer available." });
   res.download(filePath, material.originalName || material.file);
+});
+
+// Renders the file inline (no forced download) so it can be previewed before downloading.
+router.get("/materials/:id/preview", requireAuth, (req, res) => {
+  const db = store.read();
+  const material = db.materials.find((m) => m.id === req.params.id);
+  if (!material) return res.status(404).json({ error: "Material not found." });
+  const filePath = path.join(UPLOADS_DIR, material.file);
+  if (!fs.existsSync(filePath)) return res.status(404).json({ error: "File no longer available." });
+  sendInline(res, filePath, material.originalName || material.file);
 });
 
 // Only admins may publish or remove materials.

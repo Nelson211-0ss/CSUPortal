@@ -40,6 +40,7 @@ const TITLES = {
 export default function PortalLayout() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [toast, setToast] = useState("");
   const { user, logout } = useAuth();
   const navigate = useNavigate();
@@ -110,7 +111,7 @@ export default function PortalLayout() {
             </nav>
           </div>
 
-          <div className="mt-auto p-4 space-y-3">
+          <div className="mt-auto p-4">
             <div className="rounded-lg bg-[#f3ebfd] p-4">
               <div className="mb-2 flex items-center gap-2 text-[#6d28d9]">
                 <ShieldCheck size={17} />
@@ -121,15 +122,6 @@ export default function PortalLayout() {
                 View profile →
               </button>
             </div>
-            <button
-              onClick={async () => {
-                await logout();
-                navigate("/login");
-              }}
-              className="flex w-full items-center gap-2 rounded-md px-3 py-2.5 text-sm font-semibold text-slate-500 hover:bg-slate-50"
-            >
-              <LogOut size={17} /> Log out
-            </button>
           </div>
         </div>
       </aside>
@@ -165,11 +157,42 @@ export default function PortalLayout() {
                   </div>
                 )}
               </div>
-              <button onClick={() => goTo("/profile")} className="flex items-center gap-2 rounded-md border border-slate-200 bg-white p-1.5 pr-3 hover:bg-slate-50">
-                <div className="grid h-8 w-8 place-items-center rounded-lg bg-[#f3ebfd] text-xs font-bold text-[#7c3aed]">{initials}</div>
-                <span className="hidden text-sm font-semibold sm:block">{user?.name}</span>
-                <ChevronDown size={15} className="hidden text-slate-400 sm:block" />
-              </button>
+              <div className="relative">
+                <button
+                  onClick={() => setShowProfileMenu(!showProfileMenu)}
+                  className="flex items-center gap-2 rounded-md border border-slate-200 bg-white p-1.5 pr-3 hover:bg-slate-50"
+                >
+                  <div className="grid h-8 w-8 place-items-center rounded-lg bg-[#f3ebfd] text-xs font-bold text-[#7c3aed]">{initials}</div>
+                  <span className="hidden text-sm font-semibold sm:block">{user?.name}</span>
+                  <ChevronDown size={15} className="hidden text-slate-400 sm:block" />
+                </button>
+                {showProfileMenu && (
+                  <div className="absolute right-0 top-12 w-56 rounded-lg border border-slate-200 bg-white p-2 shadow-xl">
+                    <div className="border-b border-slate-100 px-3 py-2.5">
+                      <div className="truncate text-sm font-bold text-slate-900">{user?.name}</div>
+                      <div className="truncate text-xs text-slate-400">{user?.email}</div>
+                    </div>
+                    <button
+                      onClick={() => {
+                        setShowProfileMenu(false);
+                        goTo("/profile");
+                      }}
+                      className="flex w-full items-center gap-2 rounded-md px-3 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-50"
+                    >
+                      <UserRound size={16} /> View profile
+                    </button>
+                    <button
+                      onClick={async () => {
+                        await logout();
+                        navigate("/login");
+                      }}
+                      className="flex w-full items-center gap-2 rounded-md px-3 py-2.5 text-sm font-semibold text-rose-500 hover:bg-rose-50"
+                    >
+                      <LogOut size={16} /> Log out
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </header>
