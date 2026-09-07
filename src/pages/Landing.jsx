@@ -144,16 +144,16 @@ export default function Landing() {
         </div>
       </section>
 
-      <footer className="bg-[#db2777] py-8 sm:py-10">
+      <footer className="bg-[#5b21b6] py-8 sm:py-10">
         <div className="mx-auto flex max-w-[1200px] flex-col items-center gap-4 px-4 text-center sm:flex-row sm:justify-between sm:text-left sm:px-6">
           <div className="flex items-center gap-3">
             <Logo />
-            <div className="text-sm leading-tight text-pink-100">
+            <div className="text-sm leading-tight text-violet-200">
               <div className="font-bold text-white">Cytology Society of Uganda</div>
               © {new Date().getFullYear()} All rights reserved.
             </div>
           </div>
-          <div className="flex items-center gap-5 text-sm font-semibold text-pink-50">
+          <div className="flex items-center gap-5 text-sm font-semibold text-violet-100">
             <Link to="/login" className="hover:text-white">Log in</Link>
             <Link to="/register" className="hover:text-white">Create account</Link>
           </div>
