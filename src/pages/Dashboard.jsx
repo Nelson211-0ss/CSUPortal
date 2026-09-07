@@ -39,17 +39,20 @@ export default function Dashboard() {
   return (
     <div className="fade-up space-y-6">
       <section className="relative overflow-hidden rounded-lg text-white shadow-sm" style={{ background: "#2e1065" }}>
-        <div className="absolute inset-0 lg:inset-y-0 lg:right-0 lg:left-auto lg:aspect-square lg:w-auto">
+        <div className="absolute inset-y-0 right-0 w-2/5 sm:w-1/3 lg:aspect-square lg:w-auto">
           <img
             src={heroProfessional}
             alt="CSU medical professional"
             className="h-full w-full object-cover object-[center_18%] lg:object-bottom"
           />
-          <div
-            className="absolute inset-0 lg:hidden"
-            style={{ background: "linear-gradient(180deg, rgba(46,16,101,0.35) 0%, #2e1065 85%)" }}
-          />
         </div>
+        <div
+          className="absolute inset-0 lg:hidden"
+          style={{
+            background:
+              "linear-gradient(90deg, #2e1065 0%, #2e1065 52%, rgba(46,16,101,0.85) 62%, rgba(46,16,101,0.35) 76%, rgba(46,16,101,0) 92%)",
+          }}
+        />
         <div
           className="absolute inset-0 hidden lg:block"
           style={{
@@ -57,9 +60,9 @@ export default function Dashboard() {
               "linear-gradient(90deg, rgba(46,16,101,1) 0%, rgba(46,16,101,1) 70%, rgba(46,16,101,0.9) 76%, rgba(46,16,101,0.6) 83%, rgba(46,16,101,0.3) 90%, rgba(46,16,101,0) 98%)",
           }}
         />
-        <div className="relative max-w-2xl p-6 sm:p-8">
+        <div className="relative max-w-2xl p-6 pr-[44%] sm:p-8 sm:pr-[36%] lg:pr-8">
           <h1 className="text-2xl font-extrabold tracking-tight sm:text-3xl">Welcome back, {firstName}.</h1>
-          <p className="mt-1 max-w-2xl text-sm leading-6 text-slate-300">
+          <p className="mt-1 text-sm leading-6 text-slate-300">
             Track your CPD, submit evidence, discover professional learning opportunities, and keep your CSU profile
             current.
           </p>
