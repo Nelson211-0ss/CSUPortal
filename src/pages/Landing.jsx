@@ -62,7 +62,7 @@ export default function Landing() {
             <h1 className="text-4xl font-extrabold tracking-tight sm:text-6xl">
               A professional home for cytology practice in Uganda
             </h1>
-            <p className="mx-auto mt-5 max-w-md text-sm leading-6 text-slate-300 sm:text-base">
+            <p className="mx-auto mt-5 max-w-md text-base leading-7 text-slate-300 sm:text-lg">
               Track CPD, verify evidence, and discover training — all in one place.
             </p>
             <div className="mx-auto mt-8 flex w-full max-w-xs flex-col items-stretch gap-3 sm:w-auto sm:max-w-none sm:flex-row sm:flex-wrap sm:items-center sm:justify-center">
@@ -89,8 +89,8 @@ export default function Landing() {
             <div className="mb-4 inline-flex h-11 w-11 items-center justify-center rounded-md bg-[#eaf1fe] text-[#2563eb]">
               <Target size={20} />
             </div>
-            <h2 className="text-xl font-extrabold">Our Vision</h2>
-            <p className="mt-3 text-sm leading-6 text-slate-500">
+            <h2 className="text-2xl font-extrabold">Our Vision</h2>
+            <p className="mt-3 text-base leading-7 text-slate-500">
               To be a leading professional society advancing excellence, innovation and global standards in cytology
               for improved health outcomes in Uganda and beyond.
             </p>
@@ -99,8 +99,8 @@ export default function Landing() {
             <div className="mb-4 inline-flex h-11 w-11 items-center justify-center rounded-md bg-[#fdeaf3] text-[#db2777]">
               <HeartPulse size={20} />
             </div>
-            <h2 className="text-xl font-extrabold">Our Mission</h2>
-            <p className="mt-3 text-sm leading-6 text-slate-500">
+            <h2 className="text-2xl font-extrabold">Our Mission</h2>
+            <p className="mt-3 text-base leading-7 text-slate-500">
               To promote excellence in cytology practice, education, research and professional development through
               continuous learning, collaboration, advocacy and quality improvement, contributing to early disease
               detection and improved patient care.
@@ -115,8 +115,8 @@ export default function Landing() {
             <div className="mb-3 inline-flex h-10 w-10 items-center justify-center rounded-md bg-[#f3ebfd] text-[#7c3aed]">
               <ShieldCheck size={19} />
             </div>
-            <h2 className="text-2xl font-extrabold tracking-tight">Strategic Objectives</h2>
-            <p className="mt-2 text-sm leading-6 text-slate-500">
+            <h2 className="text-3xl font-extrabold tracking-tight">Strategic Objectives</h2>
+            <p className="mt-2 text-base leading-7 text-slate-500">
               Ten commitments guiding how CSU serves its members and the public.
             </p>
           </div>
@@ -126,10 +126,10 @@ export default function Landing() {
                 key={i}
                 className="flex items-center gap-4 rounded-xl border border-slate-100 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md sm:p-5"
               >
-                <div className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-[#0b0b12] text-xs font-extrabold text-white">
+                <div className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-[#0b0b12] text-sm font-extrabold text-white">
                   {i + 1}
                 </div>
-                <p className="text-sm leading-6 text-slate-600">{text}</p>
+                <p className="text-base leading-7 text-slate-600">{text}</p>
               </div>
             ))}
           </div>
@@ -144,18 +144,18 @@ export default function Landing() {
         </div>
       </section>
 
-      <footer className="border-t border-slate-100 py-8 sm:py-10">
+      <footer className="bg-[#db2777] py-8 sm:py-10">
         <div className="mx-auto flex max-w-[1200px] flex-col items-center gap-4 px-4 text-center sm:flex-row sm:justify-between sm:text-left sm:px-6">
           <div className="flex items-center gap-3">
             <Logo />
-            <div className="text-xs leading-tight text-slate-400">
-              <div className="font-bold text-slate-600">Cytology Society of Uganda</div>
+            <div className="text-sm leading-tight text-pink-100">
+              <div className="font-bold text-white">Cytology Society of Uganda</div>
               © {new Date().getFullYear()} All rights reserved.
             </div>
           </div>
-          <div className="flex items-center gap-5 text-xs font-semibold text-slate-500">
-            <Link to="/login" className="hover:text-slate-900">Log in</Link>
-            <Link to="/register" className="hover:text-slate-900">Create account</Link>
+          <div className="flex items-center gap-5 text-sm font-semibold text-pink-50">
+            <Link to="/login" className="hover:text-white">Log in</Link>
+            <Link to="/register" className="hover:text-white">Create account</Link>
           </div>
         </div>
       </footer>
@@ -174,8 +174,8 @@ function FeatureCard({ icon: Icon, title, text, tint }) {
       <div className={`mb-4 inline-flex h-11 w-11 items-center justify-center rounded-md ${tints[tint]}`}>
         <Icon size={20} />
       </div>
-      <h3 className="font-extrabold">{title}</h3>
-      <p className="mt-2 text-sm leading-6 text-slate-500">{text}</p>
+      <h3 className="text-lg font-extrabold">{title}</h3>
+      <p className="mt-2 text-base leading-7 text-slate-500">{text}</p>
     </div>
   );
 }
