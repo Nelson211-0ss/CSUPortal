@@ -4,7 +4,7 @@ import path from "node:path";
 import fs from "node:fs";
 import crypto from "node:crypto";
 import { store, UPLOADS_DIR } from "../lib/store.js";
-import { requireAuth, requireAdmin } from "../lib/auth.js";
+import { requireAuth, requireAdmin, requireRole } from "../lib/auth.js";
 
 const router = Router();
 
@@ -38,7 +38,7 @@ const REQUIRED_FIELDS = [
   "pointsClaimed",
 ];
 
-router.post("/cpd", requireAuth, (req, res) => {
+router.post("/cpd", requireAuth, requireRole("professional"), (req, res) => {
   upload.single("evidence")(req, res, async (err) => {
     if (err) return res.status(400).json({ error: err.message });
 
@@ -106,6 +106,59 @@ router.get("/cpd/:id/evidence", requireAuth, (req, res) => {
   const filePath = path.join(UPLOADS_DIR, submission.evidenceFile);
   if (!fs.existsSync(filePath)) return res.status(404).json({ error: "File no longer available." });
   res.download(filePath, submission.evidenceOriginalName || submission.evidenceFile);
+});
+
+router.get("/cpd/:id/certificate", requireAuth, (req, res) => {
+  const db = store.read();
+  const submission = db.cpdSubmissions.find((s) => s.id === req.params.id);
+  if (!submission) return res.status(404).json({ error: "Submission not found." });
+  const isOwner = submission.userId === req.auth.sub;
+  if (!isOwner && req.auth.role !== "admin") return res.status(403).json({ error: "Not authorized to view this certificate." });
+  if (submission.status !== "Verified") return res.status(400).json({ error: "Only verified activities have a certificate." });
+
+  const verifier = db.users.find((u) => u.id === submission.verifiedBy);
+  const escape = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
+  res.set("Content-Type", "text/html").send(`<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>CPD Certificate — ${escape(submission.name)}</title>
+<style>
+  body { font-family: Georgia, 'Times New Roman', serif; background:#f8f7fb; margin:0; padding:40px; }
+  .cert { max-width: 820px; margin:0 auto; background:#fff; border:10px solid #2e1065; padding:56px; text-align:center; }
+  .brand { font-size:12px; letter-spacing:.2em; text-transform:uppercase; color:#7c3aed; font-weight:bold; }
+  h1 { font-size:30px; color:#0b0b12; margin:18px 0 6px; }
+  .sub { color:#555; font-size:14px; margin-bottom:28px; }
+  .name { font-size:26px; font-weight:bold; color:#2e1065; margin:18px 0; border-bottom:2px solid #e5e0f0; display:inline-block; padding-bottom:6px; }
+  .activity { font-size:18px; margin:10px 0 22px; color:#222; }
+  .meta { display:flex; justify-content:center; gap:48px; margin-top:26px; font-size:13px; color:#444; }
+  .meta b { display:block; color:#0b0b12; font-size:15px; }
+  .footer { margin-top:44px; font-size:11px; color:#999; }
+  @media print { body { background:#fff; padding:0; } .cert { border-width:8px; } .no-print { display:none; } }
+</style>
+</head>
+<body>
+  <div class="cert">
+    <div class="brand">Cytology Society of Uganda</div>
+    <h1>Certificate of CPD Completion</h1>
+    <div class="sub">Advancing Cytology. Empowering Professionals. Improving Patient Care.</div>
+    <p>This certifies that</p>
+    <div class="name">${escape(submission.name)}</div>
+    <p>successfully completed the following CPD activity, verified by CSU:</p>
+    <div class="activity"><b>${escape(submission.activityTitle)}</b><br/>${escape(submission.cpdCategory)}</div>
+    <div class="meta">
+      <div>Date of activity<b>${escape(submission.activityDate)}</b></div>
+      <div>CPD points<b>${escape(submission.pointsClaimed)}</b></div>
+      <div>Verified on<b>${escape(new Date(submission.verifiedAt).toLocaleDateString())}</b></div>
+    </div>
+    <div class="footer">Verified by ${escape(verifier?.name || "CSU Administration")} · Certificate ID ${escape(submission.id)}</div>
+  </div>
+  <p class="no-print" style="text-align:center;margin-top:20px;">
+    <button onclick="window.print()" style="background:#7c3aed;color:#fff;border:none;border-radius:6px;padding:10px 18px;font-size:14px;cursor:pointer;">Print / Save as PDF</button>
+  </p>
+</body>
+</html>`);
 });
 
 router.get("/admin/cpd", requireAuth, requireAdmin, (req, res) => {

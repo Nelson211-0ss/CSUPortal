@@ -19,6 +19,7 @@ function seedDb() {
         email: "admin@csu.ug",
         passwordHash: bcrypt.hashSync("Admin@123", 10),
         role: "admin",
+        status: "active",
         professionalCategory: "Other",
         licenceNumber: "",
         phone: "",
@@ -28,16 +29,11 @@ function seedDb() {
       },
     ],
     cpdSubmissions: [],
+    materials: [],
     events: [
       { id: crypto.randomUUID(), title: "National Cytology Quality Workshop", date: "2026-09-18", mode: "Kampala · In person", points: 8, type: "Workshop" },
       { id: crypto.randomUUID(), title: "Cervical Cancer Screening Masterclass", date: "2026-10-03", mode: "Online", points: 5, type: "Training" },
       { id: crypto.randomUUID(), title: "CSU Annual Scientific Conference", date: "2026-11-21", mode: "Kampala · In person", points: 10, type: "Conference" },
-    ],
-    resources: [
-      { id: crypto.randomUUID(), title: "CPD Guidelines", text: "Guidance for recording, submitting and verifying professional development activities.", category: "Guideline" },
-      { id: crypto.randomUUID(), title: "Cytology Practice Resources", text: "Reference materials and professional learning resources for cytology practitioners.", category: "Reference" },
-      { id: crypto.randomUUID(), title: "Cancer Screening Information", text: "Resources supporting early detection, screening and patient-centered care.", category: "Reference" },
-      { id: crypto.randomUUID(), title: "Research & Publications", text: "Access CSU research, publications and knowledge-sharing materials.", category: "Research" },
     ],
   };
 }
@@ -50,9 +46,26 @@ function ensureDb() {
   }
 }
 
+function migrate(db) {
+  let changed = false;
+  for (const user of db.users) {
+    if (!user.status) {
+      user.status = "active";
+      changed = true;
+    }
+  }
+  if (!db.materials) {
+    db.materials = [];
+    changed = true;
+  }
+  return changed;
+}
+
 function read() {
   ensureDb();
-  return JSON.parse(fs.readFileSync(DB_FILE, "utf-8"));
+  const db = JSON.parse(fs.readFileSync(DB_FILE, "utf-8"));
+  if (migrate(db)) write(db);
+  return db;
 }
 
 function write(db) {

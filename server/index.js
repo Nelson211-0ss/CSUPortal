@@ -6,9 +6,11 @@ import authRoutes from "./routes/auth.js";
 import userRoutes from "./routes/users.js";
 import cpdRoutes from "./routes/cpd.js";
 import contentRoutes from "./routes/content.js";
+import materialsRoutes from "./routes/materials.js";
+import adminRoutes from "./routes/admin.js";
 
 const app = express();
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 4310;
 const CLIENT_ORIGIN = process.env.CLIENT_ORIGIN || "http://localhost:5173";
 
 app.use(cors({ origin: CLIENT_ORIGIN, credentials: true }));
@@ -20,6 +22,8 @@ app.use("/api/auth", authRoutes);
 app.use("/api", userRoutes);
 app.use("/api", cpdRoutes);
 app.use("/api", contentRoutes);
+app.use("/api", materialsRoutes);
+app.use("/api", adminRoutes);
 
 app.get("/api/health", (req, res) => res.json({ ok: true }));
 

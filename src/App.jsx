@@ -12,6 +12,9 @@ import Events from "./pages/Events";
 import Resources from "./pages/Resources";
 import Profile from "./pages/Profile";
 import Admin from "./pages/Admin";
+import AdminMaterials from "./pages/AdminMaterials";
+import AdminUsers from "./pages/AdminUsers";
+import AdminAnalytics from "./pages/AdminAnalytics";
 
 export default function App() {
   return (
@@ -35,6 +38,9 @@ export default function App() {
         <Route element={<ProtectedRoute adminOnly />}>
           <Route element={<PortalLayout />}>
             <Route path="/admin" element={<Admin />} />
+            <Route path="/admin/materials" element={<AdminMaterials />} />
+            <Route path="/admin/users" element={<AdminUsers />} />
+            <Route path="/admin/analytics" element={<AdminAnalytics />} />
           </Route>
         </Route>
 

@@ -33,10 +33,20 @@ export const api = {
   listCpd: () => request("/cpd"),
   submitCpd: (formData) => request("/cpd", { method: "POST", body: formData }),
   evidenceUrl: (id) => `${BASE}/cpd/${id}/evidence`,
+  certificateUrl: (id) => `${BASE}/cpd/${id}/certificate`,
 
   adminListCpd: () => request("/admin/cpd"),
   verifyCpd: (id, payload) => request(`/admin/cpd/${id}/verify`, { method: "PATCH", body: JSON.stringify(payload) }),
 
   events: () => request("/events"),
-  resources: () => request("/resources"),
+
+  listMaterials: () => request("/materials"),
+  materialFileUrl: (id) => `${BASE}/materials/${id}/file`,
+  uploadMaterial: (formData) => request("/admin/materials", { method: "POST", body: formData }),
+  deleteMaterial: (id) => request(`/admin/materials/${id}`, { method: "DELETE" }),
+
+  adminListUsers: () => request("/admin/users"),
+  updateUserStatus: (id, status) => request(`/admin/users/${id}/status`, { method: "PATCH", body: JSON.stringify({ status }) }),
+  updateUserRole: (id, role) => request(`/admin/users/${id}/role`, { method: "PATCH", body: JSON.stringify({ role }) }),
+  adminAnalytics: () => request("/admin/analytics"),
 };

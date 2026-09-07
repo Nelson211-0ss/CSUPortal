@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useOutletContext } from "react-router-dom";
-import { Award, Download } from "lucide-react";
+import { Award, Download, GraduationCap } from "lucide-react";
 import { api } from "../api";
 import { Card, MiniMetric, PageIntro, ActivityTable } from "../components/ui";
 
@@ -47,15 +47,27 @@ export default function Cpd() {
         ) : (
           <ActivityTable
             activities={filtered}
-            actions={(a) =>
-              a.evidenceFile ? (
-                <a href={api.evidenceUrl(a.id)} className="inline-flex items-center gap-1 rounded-lg px-2 py-2 text-xs font-semibold text-[#7c3aed] hover:bg-[#f3ebfd]">
-                  <Download size={14} /> Evidence
-                </a>
-              ) : (
-                <span className="text-xs text-slate-300">—</span>
-              )
-            }
+            actions={(a) => (
+              <div className="flex items-center justify-end gap-1">
+                {a.evidenceFile && (
+                  <a href={api.evidenceUrl(a.id)} title="Download evidence" className="inline-flex items-center gap-1 rounded-lg px-2 py-2 text-xs font-semibold text-[#7c3aed] hover:bg-[#f3ebfd]">
+                    <Download size={14} />
+                  </a>
+                )}
+                {a.status === "Verified" && (
+                  <a
+                    href={api.certificateUrl(a.id)}
+                    target="_blank"
+                    rel="noreferrer"
+                    title="Download certificate"
+                    className="inline-flex items-center gap-1 rounded-lg px-2 py-2 text-xs font-semibold text-[#2563eb] hover:bg-[#eaf1fe]"
+                  >
+                    <GraduationCap size={14} />
+                  </a>
+                )}
+                {!a.evidenceFile && a.status !== "Verified" && <span className="text-xs text-slate-300">—</span>}
+              </div>
+            )}
           />
         )}
       </Card>

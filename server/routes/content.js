@@ -9,9 +9,4 @@ router.get("/events", requireAuth, (req, res) => {
   res.json({ events: db.events });
 });
 
-router.get("/resources", requireAuth, (req, res) => {
-  const db = store.read();
-  res.json({ resources: db.resources });
-});
-
 export default router;

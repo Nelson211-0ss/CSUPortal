@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import {
-  Award, Bell, CalendarDays, ChevronDown, LayoutDashboard, LogOut, Menu,
-  Search, ShieldCheck, Upload, UserRound, BookOpen, X, ClipboardCheck,
+  Award, BarChart3, Bell, CalendarDays, ChevronDown, LayoutDashboard, LogOut, Menu,
+  Search, ShieldCheck, Upload, UserRound, BookOpen, X, ClipboardCheck, Users,
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { Logo, Notice, Toast } from "./ui";
@@ -32,6 +32,9 @@ const TITLES = {
   "/resources": "Resources",
   "/profile": "My Profile",
   "/admin": "CPD Verification",
+  "/admin/materials": "CPD Materials",
+  "/admin/users": "Member Management",
+  "/admin/analytics": "Compliance Analytics",
 };
 
 export default function PortalLayout() {
@@ -42,7 +45,16 @@ export default function PortalLayout() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const nav = user?.role === "admin" ? [...NAV, ["CPD Verification", "/admin", ClipboardCheck]] : NAV;
+  const nav =
+    user?.role === "admin"
+      ? [
+          ...NAV,
+          ["CPD Verification", "/admin", ClipboardCheck],
+          ["CPD Materials", "/admin/materials", BookOpen],
+          ["Member Management", "/admin/users", Users],
+          ["Compliance Analytics", "/admin/analytics", BarChart3],
+        ]
+      : NAV;
 
   const notify = (message) => {
     setToast(message);

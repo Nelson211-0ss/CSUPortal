@@ -13,6 +13,35 @@ const COOKIE_OPTS = {
   maxAge: 7 * 24 * 60 * 60 * 1000,
 };
 
+// Basic brute-force throttle: after 5 failed attempts for an email, block further
+// attempts for 5 minutes. In-memory only — resets on server restart, which is fine
+// for a single-instance deployment.
+const LOGIN_ATTEMPT_LIMIT = 5;
+const LOGIN_LOCKOUT_MS = 5 * 60 * 1000;
+const loginAttempts = new Map();
+
+function isLockedOut(key) {
+  const entry = loginAttempts.get(key);
+  if (!entry) return false;
+  if (entry.count < LOGIN_ATTEMPT_LIMIT) return false;
+  if (Date.now() - entry.lastAttempt > LOGIN_LOCKOUT_MS) {
+    loginAttempts.delete(key);
+    return false;
+  }
+  return true;
+}
+
+function recordFailedAttempt(key) {
+  const entry = loginAttempts.get(key) || { count: 0, lastAttempt: 0 };
+  entry.count += 1;
+  entry.lastAttempt = Date.now();
+  loginAttempts.set(key, entry);
+}
+
+function clearAttempts(key) {
+  loginAttempts.delete(key);
+}
+
 router.post("/register", async (req, res) => {
   const { name, email, password, professionalCategory, licenceNumber, phone, institution, designation } = req.body || {};
   if (!name || !email || !password) {
@@ -33,6 +62,7 @@ router.post("/register", async (req, res) => {
       email: normalizedEmail,
       passwordHash: bcrypt.hashSync(password, 10),
       role: "professional",
+      status: "active",
       professionalCategory: professionalCategory || "",
       licenceNumber: licenceNumber || "",
       phone: phone || "",
@@ -56,12 +86,21 @@ router.post("/login", async (req, res) => {
   if (!email || !password) return res.status(400).json({ error: "Email and password are required." });
   const normalizedEmail = String(email).trim().toLowerCase();
 
+  if (isLockedOut(normalizedEmail)) {
+    return res.status(429).json({ error: "Too many failed attempts. Please try again in a few minutes." });
+  }
+
   const db = store.read();
   const user = db.users.find((u) => u.email.toLowerCase() === normalizedEmail);
   if (!user || !bcrypt.compareSync(password, user.passwordHash)) {
+    recordFailedAttempt(normalizedEmail);
     return res.status(401).json({ error: "Invalid email or password." });
   }
+  if (user.status === "suspended") {
+    return res.status(403).json({ error: "Your account has been suspended. Contact CSU administration." });
+  }
 
+  clearAttempts(normalizedEmail);
   const token = signToken(user);
   res.cookie(COOKIE_NAME, token, COOKIE_OPTS);
   res.json({ user: publicUser(user) });
@@ -73,10 +112,7 @@ router.post("/logout", (req, res) => {
 });
 
 router.get("/me", requireAuth, (req, res) => {
-  const db = store.read();
-  const user = db.users.find((u) => u.id === req.auth.sub);
-  if (!user) return res.status(404).json({ error: "User not found." });
-  res.json({ user: publicUser(user) });
+  res.json({ user: publicUser(req.user) });
 });
 
 export default router;
