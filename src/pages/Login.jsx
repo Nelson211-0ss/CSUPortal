@@ -36,7 +36,7 @@ export default function Login() {
         <div className="flex flex-col items-center text-center">
           <Logo />
           <h1 className="mt-3 text-lg font-extrabold text-slate-900">Welcome back</h1>
-          <p className="mt-1 text-xs text-slate-500">Log in to your CSU Professional Portal account</p>
+          <p className="mt-1 text-xs text-slate-500">Log in to your CSU Portal account</p>
         </div>
 
         <form onSubmit={onSubmit} className="mt-6 space-y-3">
