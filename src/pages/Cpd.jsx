@@ -1,36 +1,58 @@
 import { useEffect, useState } from "react";
 import { useOutletContext } from "react-router-dom";
 import { Award, Download, Eye, GraduationCap } from "lucide-react";
+import { useAuth } from "../context/AuthContext";
 import { api } from "../api";
 import { Card, MiniMetric, PageIntro, ActivityTable, PreviewModal } from "../components/ui";
 
 export default function Cpd() {
   const { notify } = useOutletContext();
+  const { user } = useAuth();
+  const isAdmin = user?.role === "admin";
   const [submissions, setSubmissions] = useState([]);
   const [filter, setFilter] = useState("All");
   const [loading, setLoading] = useState(true);
   const [preview, setPreview] = useState(null);
 
   useEffect(() => {
-    api
-      .listCpd()
+    const request = isAdmin ? api.adminListCpd() : api.listCpd();
+    request
       .then(({ submissions }) => setSubmissions(submissions))
       .catch((err) => notify(err.message))
       .finally(() => setLoading(false));
-  }, []);
+  }, [isAdmin]);
 
   const filtered = filter === "All" ? submissions : submissions.filter((a) => a.status === filter);
   const totalClaimed = submissions.reduce((sum, s) => sum + Number(s.pointsClaimed || 0), 0);
   const verifiedPoints = submissions.filter((s) => s.status === "Verified").reduce((sum, s) => sum + Number(s.pointsClaimed || 0), 0);
+  const pendingCount = submissions.filter((s) => s.status === "Pending").length;
   const remaining = Math.max(0, 30 - verifiedPoints);
 
   return (
     <div className="fade-up space-y-6">
-      <PageIntro title="My CPD record" text="A transparent record of your submitted and verified continuing professional development activities." icon={Award} />
+      <PageIntro
+        title={isAdmin ? "View CPD" : "My CPD record"}
+        text={
+          isAdmin
+            ? "Every CPD activity submitted by CSU professionals — view, download or print evidence and certificates."
+            : "A transparent record of your submitted and verified continuing professional development activities."
+        }
+        icon={Award}
+      />
       <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3">
-        <MiniMetric label="Total claimed" value={totalClaimed} suffix="points" />
-        <MiniMetric label="Verified" value={verifiedPoints} suffix="points" />
-        <MiniMetric label="Remaining target" value={remaining} suffix="points" />
+        {isAdmin ? (
+          <>
+            <MiniMetric label="Total submissions" value={submissions.length} suffix="records" />
+            <MiniMetric label="Verified points" value={verifiedPoints} suffix="points" />
+            <MiniMetric label="Pending review" value={pendingCount} suffix="records" />
+          </>
+        ) : (
+          <>
+            <MiniMetric label="Total claimed" value={totalClaimed} suffix="points" />
+            <MiniMetric label="Verified" value={verifiedPoints} suffix="points" />
+            <MiniMetric label="Remaining target" value={remaining} suffix="points" />
+          </>
+        )}
       </div>
       <Card
         title="Activity history"
@@ -48,6 +70,7 @@ export default function Cpd() {
         ) : (
           <ActivityTable
             activities={filtered}
+            showOwner={isAdmin}
             actions={(a) => (
               <div className="flex items-center justify-end gap-1">
                 {a.evidenceFile && (
@@ -65,7 +88,7 @@ export default function Cpd() {
                     href={api.certificateUrl(a.id)}
                     target="_blank"
                     rel="noreferrer"
-                    title="Download certificate"
+                    title="View, download or print certificate"
                     className="inline-flex items-center gap-1 rounded-lg px-2 py-2 text-xs font-semibold text-[#2563eb] hover:bg-[#eaf1fe]"
                   >
                     <GraduationCap size={14} />

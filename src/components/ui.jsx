@@ -204,13 +204,15 @@ export function Field({ label, required, select, icon: Icon, revealable, options
   );
 }
 
-export function ActivityTable({ activities, actions }) {
+export function ActivityTable({ activities, actions, showOwner = false }) {
+  const columns = showOwner ? 7 : 6;
   return (
     <div className="overflow-x-auto">
       <table className="w-full min-w-[720px] text-left">
         <thead>
           <tr className="border-b border-slate-100 text-[10px] uppercase tracking-wider text-slate-400">
             <th className="px-3 py-3 font-bold">Activity</th>
+            {showOwner && <th className="px-3 py-3 font-bold">Submitted by</th>}
             <th className="px-3 py-3 font-bold">Category</th>
             <th className="px-3 py-3 font-bold">Date</th>
             <th className="px-3 py-3 font-bold">Points</th>
@@ -221,7 +223,7 @@ export function ActivityTable({ activities, actions }) {
         <tbody>
           {activities.length === 0 && (
             <tr>
-              <td colSpan={6} className="px-3 py-8 text-center text-sm text-slate-400">
+              <td colSpan={columns} className="px-3 py-8 text-center text-sm text-slate-400">
                 No CPD activity yet.
               </td>
             </tr>
@@ -231,6 +233,12 @@ export function ActivityTable({ activities, actions }) {
               <td className="px-3 py-4">
                 <div className="font-semibold text-sm text-slate-900">{a.activityTitle}</div>
               </td>
+              {showOwner && (
+                <td className="px-3 py-4">
+                  <div className="text-xs font-semibold text-slate-700">{a.name}</div>
+                  <div className="text-[11px] text-slate-400">{a.email}</div>
+                </td>
+              )}
               <td className="px-3 py-4 text-xs text-slate-500">{a.cpdCategory}</td>
               <td className="px-3 py-4 text-xs text-slate-500">{a.activityDate}</td>
               <td className="px-3 py-4 text-sm font-extrabold text-slate-900">{a.pointsClaimed}</td>

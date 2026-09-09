@@ -68,16 +68,16 @@ export default function PortalLayout() {
     };
   }, [showNotifications, showProfileMenu]);
 
-  const nav =
-    user?.role === "admin"
-      ? [
-          ...NAV,
-          ["CPD Verification", "/admin", ClipboardCheck],
-          ["CPD Materials", "/admin/materials", BookOpen],
-          ["Member Management", "/admin/users", Users],
-          ["Compliance Analytics", "/admin/analytics", BarChart3],
-        ]
-      : NAV;
+  const isAdmin = user?.role === "admin";
+  const nav = isAdmin
+    ? [
+        ...NAV.map(([label, path, Icon]) => (path === "/cpd" ? ["View CPD", path, Icon] : [label, path, Icon])),
+        ["CPD Verification", "/admin", ClipboardCheck],
+        ["CPD Materials", "/admin/materials", BookOpen],
+        ["Member Management", "/admin/users", Users],
+        ["Compliance Analytics", "/admin/analytics", BarChart3],
+      ]
+    : NAV;
 
   const notify = (message) => {
     setToast(message);
@@ -160,7 +160,9 @@ export default function PortalLayout() {
               <Menu />
             </button>
             <div>
-              <div className="text-lg font-bold tracking-tight">{TITLES[location.pathname] || ""}</div>
+              <div className="text-lg font-bold tracking-tight">
+                {location.pathname === "/cpd" ? (isAdmin ? "View CPD" : "My CPD") : TITLES[location.pathname] || ""}
+              </div>
               <div className="hidden text-xs text-slate-400 sm:block">Cytology Society of Uganda · Professional Portal</div>
             </div>
             <div className="ml-auto flex items-center gap-2">
@@ -243,6 +245,7 @@ export default function PortalLayout() {
 
       <nav className="fixed inset-x-0 bottom-0 z-40 flex items-center justify-around bg-[#5b21b6] px-2 py-2 shadow-[0_-2px_12px_rgba(0,0,0,.15)] lg:hidden">
         {MOBILE_NAV.map(([label, path, Icon]) => {
+          if (path === "/cpd" && isAdmin) label = "View CPD";
           const active = location.pathname === path;
           return (
             <button

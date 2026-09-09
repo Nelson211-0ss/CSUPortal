@@ -13,16 +13,17 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const { notify } = useOutletContext();
   const { user } = useAuth();
+  const isAdmin = user?.role === "admin";
   const [submissions, setSubmissions] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    api
-      .listCpd()
+    const request = isAdmin ? api.adminListCpd() : api.listCpd();
+    request
       .then(({ submissions }) => setSubmissions(submissions))
       .catch((err) => notify(err.message))
       .finally(() => setLoading(false));
-  }, []);
+  }, [isAdmin]);
 
   const stats = useMemo(() => {
     const verified = submissions.filter((s) => s.status === "Verified");
@@ -129,7 +130,7 @@ export default function Dashboard() {
         {loading ? (
           <div className="py-6 text-center text-sm text-slate-400">Loading...</div>
         ) : (
-          <ActivityTable activities={submissions.slice(0, 3)} />
+          <ActivityTable activities={submissions.slice(0, 3)} showOwner={isAdmin} />
         )}
       </Card>
     </div>
